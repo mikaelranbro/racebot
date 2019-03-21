@@ -17,10 +17,12 @@ speak file "c:\temp\speak1.txt"
 speak file "c:\temp\speak1.txt" 0 100 "c:\temp\speak.wav" 48kHz16BitStereo
 */
 const fs = require('fs');
+const settings = require('./settings.json');
 var execFile = require('child_process').execFile;
 var voiceConnection = null;
 var drivers = null;
-var muted = false;
+var muted = settings.startMute;
+
 const names = {
 	"Mikael": "Meekell",
 	"borbo": "Boarboo",
@@ -51,9 +53,11 @@ module.exports.setDrivers = function setDrivers(drivers_) {
 	drivers = drivers_;
 }
 
-module.exports.speak = async function speak(text, speed = 0, delay_s=0) {
+module.exports.speak = async function speak(text, speed = 0, delay_s = 0) {
 	var volume = 100;
-	if (muted) {return;}
+	if (muted) {
+		return;
+	}
 
 	if (delay_s > 0) {
 		await sleep(delay_s * 1000);
@@ -74,12 +78,14 @@ module.exports.speak = async function speak(text, speed = 0, delay_s=0) {
 		} else {
 			filename = text;
 		}
-		if (speed > 0) {filename += '_' + speed}
+		if (speed > 0) {
+			filename += '_' + speed
+		}
 		filename = filename.replace(/[, \.]+/, '_');
 		filename = './sound/' + filename.replace('.', '_') + '.wav';
 		if (!fs.existsSync(filename)) {
 			Object.keys(names).forEach(function(name) {
-  			var spelling = names[name];
+				var spelling = names[name];
 				text = text.replace(name, spelling);
 			});
 			const child = execFile('nircmd/nircmd.exe', ['speak', 'text', text, speed, volume, filename, '48kHz16BitMono'], (error, stdout, stderr) => {
@@ -87,19 +93,19 @@ module.exports.speak = async function speak(text, speed = 0, delay_s=0) {
 					console.error('stderr', stderr);
 					throw error;
 				} else {
-		  		const dispatcher = voiceConnection.playFile(filename);
-		  		dispatcher.on('end', () => {
+					const dispatcher = voiceConnection.playFile(filename);
+					dispatcher.on('end', () => {
 						console.log("Done playing '" + filename + "' - took " + dispatcher.totalStreamTime);
 					});
 					dispatcher.on('error', e => {
 						console.error(e);
 					});
-		  	}
+				}
 			});
 		} else {
-		  const dispatcher = voiceConnection.playFile(filename);
-		  dispatcher.on('end', () => {
-			console.log("Done playing '" + filename + "' - took " + dispatcher.totalStreamTime);
+			const dispatcher = voiceConnection.playFile(filename);
+			dispatcher.on('end', () => {
+				console.log("Done playing '" + filename + "' - took " + dispatcher.totalStreamTime);
 			});
 			dispatcher.on('error', e => {
 				console.error(e);
@@ -108,15 +114,8 @@ module.exports.speak = async function speak(text, speed = 0, delay_s=0) {
 	}
 };
 
-function sleep(ms){
-  return new Promise(resolve=>{
-    setTimeout(resolve,ms)
-  })
+function sleep(ms) {
+	return new Promise(resolve => {
+		setTimeout(resolve, ms)
+	})
 }
-
-// Mikael -> Meekell, Michael
-// Borbo -> Boarboo
-// Sadjev -> Sedjef, Sadjaeve ?
-// Anders -> Anderrs
-// Robert -> Robert, Rowbert
-// Rymdkatten -> Riymdkattene

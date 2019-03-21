@@ -1,5 +1,6 @@
 const moment = require('moment');
 const axios = require('axios');
+const settings = require('./settings.json');
 var voice = null;
 var season = null;
 var textChannel = null
@@ -9,7 +10,6 @@ var running = false;
 var racePromise = null;
 var collectPromise = null;
 var raceStartMoment = moment();
-var crestEnabled = false;
 var crestPollInterval = 1000;
 var currentMetrics = null;
 const crestUrl = 'http://localhost:8180/crest2/v1/api';
@@ -76,7 +76,7 @@ module.exports.prepare = function prepare(minDiff = 3) {
 		discordToSteam[driver.name] = driver.steamName;
 	});
 
-	if (crestEnabled) {
+	if (settings.crestEnabled) {
 		axios.get(crestUrl + '?' + CrestParam.PARTICIPANTS).then(response => {
 			var p = response.data.participants;
 			for (var i = 0; i < p.mNumParticipants; i++) {
@@ -128,7 +128,7 @@ module.exports.start = function start(startDelay = 10) {
 	running = true;
 
 	crestPollInterval = 1000;
-	if (crestEnabled) {
+	if (settings.crestEnabled) {
 		collectPromise = collectMetrics();
 	}
 	racePromise = runRace(startDelay);
@@ -305,7 +305,7 @@ async function runRace(startDelay = 10) {
 }
 
 async function checkStart(driver, delay_ms) {
-	if (crestEnabled) {
+	if (settings.crestEnabled) {
 		await sleep(delay_ms);	
 		if (!currentMetrics.hasOwnProperty(driver.name)) {
 			console.out('*** No driver named ' + driver.name + ' ***');
