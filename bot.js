@@ -1,6 +1,6 @@
 // share link: https://discordapp.com/oauth2/authorize?&client_id=552108652446744587&scope=bot&permissions=104324161
 
-var offline = false; // <---- For offline debug sessions
+var offline = true; // <---- For offline debug sessions
 
 const Discord = require('discord.js');
 const client = new Discord.Client();

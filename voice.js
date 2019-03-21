@@ -63,10 +63,9 @@ module.exports.speak = async function speak(text, speed = 0, delay_s=0) {
 		console.log("Locally: " + text);
 		const child = execFile('nircmd/nircmd.exe', ['speak', 'text', text, speed, volume], (error, stdout, stderr) => {
 			if (error) {
-				console.error('stderr', stderr);
+				console.log(error);
 				throw error;
 			}
-			console.log('stdout', stdout);
 		});
 	} else {
 		var filename;
