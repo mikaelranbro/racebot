@@ -1,7 +1,6 @@
 // share link: https://discordapp.com/oauth2/authorize?&client_id=552108652446744587&scope=bot&permissions=104324161
 
-var offline = true; // <---- For offline debug sessions
-
+const settings = require('./settings.json');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const auth = require('./auth.json');
@@ -9,9 +8,9 @@ module.exports.voice = voice = require('./voice.js');
 module.exports.season = season = require('./season.js');
 module.exports.race = race = require('./race.js');
 const prefix = '!';
-var exec = require('child_process').exec;
-var execSync = require('child_process').execSync;
-var execFile = require('child_process').execFile;
+// var exec = require('child_process').exec;
+// var execSync = require('child_process').execSync;
+// var execFile = require('child_process').execFile;
 var textChannel = null;
 var voiceChannel = null;
 var voiceConnection = null;
@@ -43,7 +42,7 @@ console.log("error: " + result.error);
 */
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // voice.speak("1 .. 2 .. 3 .. 4", 5);
@@ -61,7 +60,9 @@ async function after() {
 // voice.mute(); //                                     <------------------- REMOVE!!
 
 client.once('ready', () => {
-	client.user.setActivity('Project Cars 2', {"type": "WATCHING"});
+	client.user.setActivity('Project Cars 2', {
+		"type": "WATCHING"
+	});
 	client.guilds.forEach((guild) => {
 		console.log(guild.name + ': ');
 		guild.channels.forEach((channel) => {
@@ -75,7 +76,7 @@ client.once('ready', () => {
 		});
 	});
 	ready = true;
-	if ( voiceChannel === null) {
+	if (voiceChannel === null) {
 		console.error('Unable to find voice channel "pCars".');
 		ready = false;
 	} else {
@@ -102,8 +103,12 @@ client.once('ready', () => {
 });
 
 client.on('voiceStateUpdate', (oldMember, newMember) => {
-	if (newMember.user.id === client.user.id) {return;}
-	if (voiceConnection === null) { return; }
+	if (newMember.user.id === client.user.id) {
+		return;
+	}
+	if (voiceConnection === null) {
+		return;
+	}
 	if (newMember.voiceChannel === voiceChannel) {
 		console.log(newMember.user.username + " joined channel.");
 		voice.speak("Hey, " + newMember.user.username);
@@ -120,100 +125,104 @@ client.on('message', message => {
 		return;
 	}
 	console.log(message.content);
-	if (message.content.substring(0,1) === prefix) {
+	if (message.content.substring(0, 1) === prefix) {
 		var args = message.content.substring(1).split(/ +/);
 		var cmd = args.shift().toLowerCase();
 		console.log(message.author.username + ": " + message.content);
 		switch (cmd) {
-		case 'help':
-		case '?':
-		case 'h':
-			message.channel.send(helpString);
-			break;
-		case 'ping':
-			message.channel.send('Pong.');
-			break;
-		case 'standings':
-		case 'status':
-		  message.channel.send(season.getTable());
-			break;
-		case 'register':
-			if (args.length > 1) {
-				season.register(message.author, args[0], args[1]);
-				voice.names[message.author.username] = args[1];
-			} else if (args.length > 0) {
-				season.register(message.author, args[0]);
-			} else {
-				season.register(message.author);
-			}
-			voice.speak('Welcome ' + message.author.username);
-		case 'info':
-		case 'schedule':
-		  message.channel.send(season.getSchedule());
-			break;
-		case 'greet':
-			voice.speak("Hey, " + message.author.username);
-			break;
-		case 'say':
-			if (args.length > 0) {
-				voice.speak(args.join(' '));
-			} else {
-				voice.speak("Say what, " + message.author.username + "?", 1);
-			}
-			break;
-		case 'write':
-		case 'announce':
-			if (args.length > 0) {
-				textChannel.send(args.join(' '));
-			} else {
-				message.channel.send(message.author.username + ', the syntax is: "!write <text>"');
-			}
-			break;
-		case 'honk':
-	  	console.log("Honking");
-	  	voiceConnection.playFile('./carhorn.mp3');
-		  break;
-		case 'mute':
-			voice.mute();
-			break;
-		case 'unmute':
-			voice.unMute();
-			break;
-		case 'prepare':
-		case 'init':
-			var msg = race.prepare();
-			if (msg !== null && msg.length > 0) {
-				textChannel.send(msg);
-			}
-			break;
-		case 'begin':
-		case 'start':
-			if (args.length > 0) {
-				race.start(parseInt(args[0], 10));
-			} else {
-				race.start();
-			}
-			break;
-		case 'abort':
-		case 'cancel':
-		case 'reset':
-			race.abort();
-			break;
-		case 'finish':
-		case 'commit':
-			race.finish();
-			break;
-		default:
-			message.channel.send('Unknown command, type "!help".');
+			case 'help':
+			case '?':
+			case 'h':
+				message.channel.send(helpString);
+				break;
+			case 'ping':
+				message.channel.send('Pong.');
+				break;
+			case 'standings':
+			case 'status':
+				message.channel.send(season.getTable());
+				break;
+			case 'register':
+				if (args.length > 1) {
+					season.register(message.author, args[0], args[1]);
+					voice.names[message.author.username] = args[1];
+				} else if (args.length > 0) {
+					season.register(message.author, args[0]);
+				} else {
+					season.register(message.author);
+				}
+				voice.speak('Welcome ' + message.author.username);
+			case 'info':
+			case 'schedule':
+				message.channel.send(season.getSchedule());
+				break;
+			case 'greet':
+				voice.speak("Hey, " + message.author.username);
+				break;
+			case 'say':
+				if (args.length > 0) {
+					voice.speak(args.join(' '));
+				} else {
+					voice.speak("Say what, " + message.author.username + "?", 1);
+				}
+				break;
+			case 'write':
+			case 'announce':
+				if (args.length > 0) {
+					textChannel.send(args.join(' '));
+				} else {
+					message.channel.send(message.author.username + ', the syntax is: "!write <text>"');
+				}
+				break;
+			case 'honk':
+				console.log("Honking");
+				voiceConnection.playFile('./carhorn.mp3');
+				break;
+			case 'mute':
+				voice.mute();
+				break;
+			case 'unmute':
+				voice.unMute();
+				break;
+			case 'prepare':
+			case 'init':
+				var msg = race.prepare();
+				if (msg !== null && msg.length > 0) {
+					textChannel.send(msg);
+				}
+				break;
+			case 'begin':
+			case 'start':
+				if (args.length > 0) {
+					race.start(parseInt(args[0], 10));
+				} else {
+					race.start();
+				}
+				break;
+			case 'abort':
+			case 'cancel':
+			case 'reset':
+				race.abort();
+				break;
+			case 'finish':
+			case 'commit':
+				race.finish();
+				break;
+			default:
+				message.channel.send('Unknown command, type "!help".');
 		}
-	} else if (message.content.substring(0,1) === '?') {
+	} else if (message.content.substring(0, 1) === '?') {
 		message.channel.send(helpString);
 	}
 });
 
 // client.login('NTUyMTA4NjUyNDQ2NzQ0NTg3.D172-Q.X2JDnUrmr9YegYIAe-mJbHTTHFg');
-if (offline) {
-	textChannel = { 'send': function(msg) {console.log('[ToRaceControl] ' + msg);}};
+if (settings.offline) {
+	textChannel = {
+		'send': function(msg) {
+			console.log('[ToRaceControl] ' + msg);
+		}
+	};
 	race.init(voice, textChannel, season);
 	const tests = require('./test.js');
 	tests.runOffline(this);
@@ -222,26 +231,25 @@ if (offline) {
 }
 
 if (process.platform === "win32") {
-  var rl = require("readline").createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
+	var rl = require("readline").createInterface({
+		input: process.stdin,
+		output: process.stdout
+	});
 
-  rl.on("SIGINT", function () {
-    process.emit("SIGINT");
-  });
+	rl.on("SIGINT", function() {
+		process.emit("SIGINT");
+	});
 }
 
-process.on("SIGINT", function () {
-  //graceful shutdown
-  if (!offline) {
-  	voiceConnection.disconnect();
-  }
-  race.abort();
-  client.destroy();
-  process.exit();
+process.on("SIGINT", function() {
+	//graceful shutdown
+	if (!settings.offline) {
+		voiceConnection.disconnect();
+	}
+	race.abort();
+	client.destroy();
+	process.exit();
 });
-
 
 
 
