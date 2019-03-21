@@ -1,0 +1,66 @@
+{
+	"veloxieer": {
+		"name": "veloxieer",
+		"steamName": "veloxieer",
+		"points": 9,
+		"position": 1,
+		"car": null,
+		"sounds": "veloxieer"
+	},
+	"borbo": {
+		"name": "borbo",
+		"steamName": "Borbo",
+		"points": 7,
+		"position": 2,
+		"car": null,
+		"sounds": "Boarboo"
+	},
+	"Mikael": {
+		"name": "Mikael",
+		"steamName": "Mikael",
+		"points": 6,
+		"position": 3,
+		"car": null,
+		"sounds": "Mee-kell"
+	},
+	"Sadjev": {
+		"name": "Sadjev",
+		"steamName": "Sadjev",
+		"points": 5,
+		"position": 4,
+		"car": null,
+		"sounds": "Zadj-eve"
+	},
+	"Rymdkatten": {
+		"name": "Rymdkatten",
+		"steamName": "Rymdkatten",
+		"points": 4,
+		"position": 5,
+		"car": null,
+		"sounds": "Riymdkattene"
+	},
+	"Staffan": {
+		"name": "Staffan",
+		"steamName": "Staffan",
+		"points": 3,
+		"position": 6,
+		"car": null,
+		"sounds": "Stuff-anne"
+	},
+	"Håkan": {
+		"name": "Håkan",
+		"steamName": "magnavenatus",
+		"points": 2,
+		"position": 7,
+		"car": null,
+		"sounds": "Hawk-anne"
+	},
+	"Robert": {
+		"name": "Robert",
+		"steamName": "Robert",
+		"points": 1,
+		"position": 8,
+		"car": null,
+		"sounds": "Row-bert"
+	}
+}
