@@ -7,6 +7,9 @@ let nextRace = null;
 let penaltyPerPoint = 2;
 
 // Backup
+if (!fs.existsSync('backup')) {
+	fs.mkdirSync('backup');
+}
 fs.copyFile('drivers.json', ('backup/drivers_' + moment().format('YYYYMMDD_HHmmss') + '.json'), (err) => {
 	if (err) throw err;
 	console.log('Made backup of drivers.');
