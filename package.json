@@ -1,0 +1,17 @@
+{
+  "name": "RaceBot",
+  "version": "0.1.0",
+  "description": "A bot for controlling races",
+  "main": "bot.js",
+  "author": "Mikael Ranbro",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "discord.io": "^2.5.3",
+    "discord.js": "^11.4.2",
+    "ffmpeg-binaries": "^4.0.0",
+    "got": "^9.6.0",
+    "moment": "^2.24.0",
+    "node-opus": "^0.3.1",
+    "opusscript": "0.0.6"
+  }
+}
