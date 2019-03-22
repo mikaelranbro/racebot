@@ -53,8 +53,7 @@ module.exports.setDrivers = function setDrivers(drivers_) {
 	drivers = drivers_;
 }
 
-module.exports.speak = async function speak(text, speed = 0, delay_s = 0) {
-	var volume = 100;
+module.exports.speak = async function speak(text, speed = 0, delay_s = 0, volume = 75) {
 	if (muted) {
 		return;
 	}
