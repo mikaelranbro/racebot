@@ -1,6 +1,8 @@
 #workspaces
 RaceBot.sublime-project
 RaceBot.sublime-workspace
+authorization.json
+crest/
 
 # Data backup
 backup/

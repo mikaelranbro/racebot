@@ -1,16 +1,14 @@
-// share link: https://discordapp.com/oauth2/authorize?&client_id=552108652446744587&scope=bot&permissions=104324161
+// sample share link: https://discordapp.com/oauth2/authorize?&client_id=552108652446744587&scope=bot&permissions=104324161
+// authorization.json must be created with unique bot token
 
 const settings = require('./settings.json');
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const auth = require('./auth.json');
+const auth = require('./authorization.json');
 module.exports.voice = voice = require('./voice.js');
 module.exports.season = season = require('./season.js');
 module.exports.race = race = require('./race.js');
 const prefix = '!';
-// var exec = require('child_process').exec;
-// var execSync = require('child_process').execSync;
-// var execFile = require('child_process').execFile;
 var textChannel = null;
 var voiceChannel = null;
 var voiceConnection = null;
@@ -31,33 +29,9 @@ const helpString = '\
 \n !unmute - unsilence the bot\
 \n !honk - wake people up';
 
-// https://stackoverflow.com/questions/20643470/execute-a-command-line-binary-with-node-js
-/*
-var result= execSync("voice.exe This is a test!",,{});
- 
-console.log("voice...");
-console.log("stdout: " + result.stdout);
-console.log("stderr: " + result.stderr);
-console.log("error: " + result.error);
-*/
-
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-// voice.speak("1 .. 2 .. 3 .. 4", 5);
-
-
-async function after() {
-	await sleep(2000);
-	// console.log(child);
-	console.log(child.stderr);
-}
-
-// after();
-
-
-// voice.mute(); //                                     <------------------- REMOVE!!
 
 client.once('ready', () => {
 	client.user.setActivity('Project Cars 2', {
@@ -250,36 +224,3 @@ process.on("SIGINT", function() {
 	client.destroy();
 	process.exit();
 });
-
-
-
-/*
-console.log("Bot created");
-client.on('ready', function (evt) {
-  console.log('Connected');
-  console.log('Logged in as: ');
-  console.log(client.username + ' - (' + client.id + ')');
-});
-client.on('message', function (user, userID, channelID, message, evt) {
-  // Our bot needs to know if it will execute a command
-  // It will listen for messages that will start with `!`
-  if (message.substring(0, 1) == '!') {
-   	var args = message.substring(1).split(' ');
-    var cmd = args[0];
-    console.log(cmd);
-    args = args.splice(1);
-    switch(cmd) {
-      // !ping
-    case 'ping':
-      bot.sendMessage({
-	      to: channelID,
-        message: 'Pong!'
-      });
-      break;
-      // Just add any case commands if you want to..
-    }
-  }
-});
-
-client.login(auth.token);
-*/

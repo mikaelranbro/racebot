@@ -85,10 +85,11 @@ module.exports.getSchedule = function getSchedule() {
 	return output;
 };
 
-module.exports.getStartOrder = function getStartOrder(minDiff = 3, raceDrivers = drivers) {
+module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants = drivers) {
 	var keys = Object.keys(drivers);
 	// console.log('-------------------\nKeys:\n' + keys);
-	var offset = drivers[keys[nbrDrivers - 1]].points;
+	//var offset = drivers[keys[nbrDrivers - 1]].points;
+	var offset = -1;
 	var starts = [];
 	var currentStart = {
 		"delay": 0,
@@ -97,10 +98,16 @@ module.exports.getStartOrder = function getStartOrder(minDiff = 3, raceDrivers =
 	};
 	i = nbrDrivers;
 	var delay = 0;
+	var startPos = 1;
 	while (i > 0) {
 		i--;
 		let driver = drivers[keys[i]];
-		if (raceDrivers.hasOwnProperty(driver.name)) {
+		if (participants.hasOwnProperty(driver.steamName)) {
+			if (offset < 0) {
+				offset = driver.points;
+			}
+			driver.startPosition = startPos;
+			startPos++;
 			let gap = (driver.points - offset) * settings.secondsPerPoint - delay;
 			console.log(driver.name + ' ... Delay: ' + delay + ', offset: ' + offset + ', gap: ' + gap);
 			if (gap >= minDiff) {
@@ -114,7 +121,7 @@ module.exports.getStartOrder = function getStartOrder(minDiff = 3, raceDrivers =
 			}
 			currentStart.drivers.push(driver);
 		} else {
-			console.log(driver.name + ' is not present.');
+			console.log(driver.name + ' (' + driver.steamName + ') is not present.');
 		}
 	}
 	starts.push(currentStart);

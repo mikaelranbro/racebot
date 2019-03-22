@@ -1,6 +1,10 @@
 {
 	"offline": true,
 	"secondsPerPoint": 2,
+	"minStartDiff": 3,
+	"startTriggerTime": 5,
+	"startDelay": 10,
 	"startMute": false,
-	"crestEnabled": false
+	"crestEnabled": true,
+	"crestTickInterval": 100
 }
