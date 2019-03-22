@@ -9,8 +9,9 @@ var running = false;
 var racePromise = null;
 var crestPromise = null;
 var raceStartMoment = moment();
+var previousAnnounce = moment();
 var currentMetrics = null;
-var track = {};
+var eventInformation = null;
 const crestUrl = 'http://localhost:8180/crest2/v1/api';
 
 //	[steamName]: {'name':'', 'steamName':'' 'speed': 0, 'position': 0, 'lapsCompleted': 0, 'currentLap': 0, distance': 0, 'fastestLap': 1000}
@@ -76,7 +77,10 @@ const RaceState = {
 		WAITING_FOR_DELAY: 'Waiting for delay',
 		EXECUTING: 'Starting'
 	},
-	RUNNING: 'running',
+	RUNNING: {
+		SILENT: 'running silent',
+		LOUD: 'running'
+	},
 	FINISHING: {
 		UPDATING_STANDINGS: 'Updating standings',
 		DONE: 'Race finished'
@@ -195,7 +199,9 @@ module.exports.finish = function finish() {
 };
 
 function speakAnnouncements() {
-	if (announcements.length > 0 && voice !== null) {
+	var now = moment();
+	if (announcements.length > 0 && voice !== null && now.diff(previousAnnounce) > 5000) {
+		previousAnnounce = moment();
 		voice.speak(announcements.shift());
 	}
 }
@@ -228,7 +234,6 @@ async function crestLoop() {
 
 		gameStateAge += elapsed;
 		if (collectGameState) {
-
 			if (gameStateAge > gameStateInterval) {
 				// console.log('Collecting gameState, ' + gameStateAge + 'ms since last time.');
 				gameStateAge = 0;
@@ -240,6 +245,12 @@ async function crestLoop() {
 						currentPCState.sessionState = response.data.gameStates.mSessionState;
 						currentPCState.raceState = response.data.gameStates.mRaceState;
 						console.log(currentPCState);
+						if (eventInformation === null && (currentPCState.sessionState === PC.SessionState.SESSION_RACE ||
+								currentPCState.sessionState === PC.SessionState.TRAINING)) {
+							axios.get(crestUrl + '?' + CrestParam.EVENT_INFORMATION).then(response => {
+								eventInformation = response.data.eventInformation;
+							});
+						}
 					}
 				}).catch(error => {
 					// console.log(error);
@@ -292,8 +303,13 @@ async function raceLoop() {
 	collectMetrics = false;
 	collectGameState = true;
 	var reminderMoment = null;
+	var welcomeDone = false;
 	while (running) {
 		let elapsed = moment().diff(stateTime); // time in the current state
+		if (!welcomeDone && eventInformation !== null) {
+			// announcements.push('Welcome to ' + eventInformation.mTrackLocation + ' ' + eventInformation.mTranslatedTrackVariation);
+			welcomeDone = true;
+		}
 		switch (raceState) {
 			case RaceState.PREPARING.WATING_FOR_GAME_START:
 				if (currentPCState.gameState !== PC.GameState.GAME_EXITED) {
@@ -305,7 +321,7 @@ async function raceLoop() {
 			case RaceState.PREPARING.WAITING_FOR_RACE_START:
 				collectMetrics = true;
 				if (currentPCState.sessionState === PC.SessionState.SESSION_RACE &&
-					currentPCState.raceState == PC.RaceState.RACESTATE_RACING) {
+					currentPCState.raceState === PC.RaceState.RACESTATE_RACING) {
 					stateTime = changeState(RaceState.PREPARING.CALCULATING, stateTime);
 				} else {
 					speakAnnouncements();
@@ -331,7 +347,7 @@ async function raceLoop() {
 				metricsInterval = 1000;
 				collectMetrics = true;
 				Object.keys(participants).forEach((name) => {
-					console.log(elapsed + '   ' + name + ': ' + participants[name].speed);
+					// console.log(elapsed + '   ' + name + ': ' + participants[name].speed);
 					if (participants[name].speed > 1) {
 						stateTime = moment();
 						stationary = false;
@@ -391,13 +407,18 @@ async function raceLoop() {
 						startDuration = start.delay * 1000 + 1000;
 					}
 				} else {
-					if (elapsed >= startDuration) {
-						stateTime = changeState(RaceState.RUNNING, stateTime);
+					if (elapsed >= 4000) {
+						stateTime = changeState(RaceState.RUNNING.SILENT, stateTime);
 					}
 				}
 				break;
-
-			case RaceState.RUNNING:
+			case RaceState.RUNNING.SILENT:
+				metricsInterval = 1000;
+				if (elapsed > 10000) {
+					stateTime = changeState(RaceState.RUNNING.LOUD, stateTime);
+				}
+				break;
+			case RaceState.RUNNING.LOUD:
 				metricsInterval = 1000;
 				speakAnnouncements();
 				if (currentPCState.raceState === PC.RaceState.RACESTATE_FINISHED) {
@@ -420,10 +441,10 @@ async function raceLoop() {
 function checkOrder() {
 	var correct = true;
 	var text = '';
-	for (let i = 0; i < startOder.length; i++) {
+	for (let i = 0; i < startOrder.length; i++) {
 		if (participants[startOrder[i].steamName].position !== (i + 1)) {
 			correct = false;
-			text += startOder[i].sounds + ', ';
+			text += startOrder[i].sounds + ', ';
 		}
 	}
 	if (!correct) {

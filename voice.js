@@ -33,7 +33,8 @@ const names = {
 	"Per": "Paire",
 	"Håkan": "Hawk-anne",
 	"Staffan": "Stuff-anne",
-	"roblind": "Row-bert"
+	"roblind": "Row-bert",
+	"Nurburgring": "Neur-burg-ring"
 };
 module.exports.names = names;
 
