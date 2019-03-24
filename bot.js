@@ -137,7 +137,7 @@ client.on('message', message => {
 				if (args.length > 0) {
 					voice.speak(args.join(' '));
 				} else {
-					voice.speak("Say what, " + message.author.username + "?", 1);
+					voice.speak("Say what, " + message.author.username + "?");
 				}
 				break;
 			case 'write':
@@ -150,7 +150,7 @@ client.on('message', message => {
 				break;
 			case 'honk':
 				console.log("Honking");
-				voiceConnection.playFile('./carhorn.mp3');
+				voiceConnection.playFile('./sfx/honk.wav');
 				break;
 			case 'mute':
 				voice.mute();
@@ -201,7 +201,12 @@ if (settings.offline) {
 	const tests = require('./test.js');
 	tests.runOffline(this);
 } else {
-	client.login(auth.token);
+	client.login(auth.token).then(() => {
+		if (settings.runTest) {
+			const tests = require('./test.js');
+			tests.runOffline(this);
+		}
+	});
 }
 
 if (process.platform === "win32") {

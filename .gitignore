@@ -8,7 +8,7 @@ crest/
 backup/
 
 # Generated audio
-*.wav
+sound/*.wav
 
 # Logs
 logs

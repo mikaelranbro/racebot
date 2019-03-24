@@ -17,11 +17,22 @@ speak file "c:\temp\speak1.txt"
 speak file "c:\temp\speak1.txt" 0 100 "c:\temp\speak.wav" 48kHz16BitStereo
 */
 const fs = require('fs');
+const player = require('node-wav-player');
 const settings = require('./settings.json');
 var execFile = require('child_process').execFile;
 var voiceConnection = null;
 var drivers = null;
 var muted = settings.startMute;
+var busy = false;
+
+const Priority = {
+	'NONSENSE': 0,
+	'INFO': 1,
+	'EVENTUAL': 2,
+	'CRITICAL': 3
+};
+module.exports.Priority = Priority;
+var currentPriority = Priority.NONSENSE;
 
 const names = {
 	"Mikael": "Meekell",
@@ -54,18 +65,15 @@ module.exports.setDrivers = function setDrivers(drivers_) {
 	drivers = drivers_;
 }
 
-module.exports.speak = async function speak(text, speed = 0, delay_s = 0, volume = 75) {
-	if (muted) {
-		return;
-	}
-
-	if (delay_s > 0) {
-		await sleep(delay_s * 1000);
-	}
+function speakText(text, priority, speed = 0, volume = 0.75) {
+	currentPriority = priority;
+	busy = true;
 
 	if (voiceConnection === null) {
 		console.log("Locally: " + text);
-		const child = execFile('nircmd/nircmd.exe', ['speak', 'text', text, speed, volume], (error, stdout, stderr) => {
+		const child = execFile('nircmd/nircmd.exe', ['speak', 'text', text, speed, volume * 100], (error, stdout, stderr) => {
+			console.log('Done speaking ' + text);
+			busy = false;
 			if (error) {
 				console.log(error);
 				throw error;
@@ -88,13 +96,17 @@ module.exports.speak = async function speak(text, speed = 0, delay_s = 0, volume
 				var spelling = names[name];
 				text = text.replace(name, spelling);
 			});
-			const child = execFile('nircmd/nircmd.exe', ['speak', 'text', text, speed, volume, filename, '48kHz16BitMono'], (error, stdout, stderr) => {
+			const child = execFile('nircmd/nircmd.exe', ['speak', 'text', text, speed, 100, filename, '48kHz16BitMono'], (error, stdout, stderr) => {
 				if (error) {
 					console.error('stderr', stderr);
 					throw error;
 				} else {
-					const dispatcher = voiceConnection.playFile(filename);
+					const dispatcher = voiceConnection.playFile(filename, {
+						'volume': volume,
+						'passes': priority + 2
+					});
 					dispatcher.on('end', () => {
+						busy = false;
 						console.log("Done playing '" + filename + "' - took " + dispatcher.totalStreamTime);
 					});
 					dispatcher.on('error', e => {
@@ -103,8 +115,12 @@ module.exports.speak = async function speak(text, speed = 0, delay_s = 0, volume
 				}
 			});
 		} else {
-			const dispatcher = voiceConnection.playFile(filename);
+			const dispatcher = voiceConnection.playFile(filename, {
+				'volume': volume,
+				'passes': priority + 2
+			});
 			dispatcher.on('end', () => {
+				busy = false;
 				console.log("Done playing '" + filename + "' - took " + dispatcher.totalStreamTime);
 			});
 			dispatcher.on('error', e => {
@@ -112,6 +128,110 @@ module.exports.speak = async function speak(text, speed = 0, delay_s = 0, volume
 			});
 		}
 	}
+};
+
+module.exports.speak = async function speak(text, priority = Priority.INFO, speed = 0, delay_ms = 0) {
+	if (muted) return;
+	if (delay_ms > 0) await sleep(delay_ms);
+
+	switch (priority) {
+		case Priority.NONSENSE:
+			if (isBusy()) {
+				speakText(text, priority, speed, 0.7);
+			}
+			break;
+		case Priority.INFO:
+			if (!isBusy() || priority > currentPriority) {
+				speakText(text, priority, speed, 0.8);
+			}
+			break;
+		case Priority.EVENTUAL:
+			var tries = 0;
+			while (isBusy() && currentPriority > Priority.NONSENSE) {
+				if (tries > 20) return;
+				await sleep(1000);
+				tries++;
+			}
+			speakText(text, priority, speed, 0.80);
+			break;
+		case Priority.CRITICAL:
+			speakText(text, priority, speed, 1);
+			break;
+	}
+}
+
+
+function isBusy() {
+	if (voiceConnection !== null) {
+		return voiceConnection.speaking;
+	} else {
+		return busy;
+	}
+}
+module.exports.isBusy = isBusy;
+
+function playFile(filename, priority, volume) {
+	currentPriority = priority;
+	console.log('Playing file ' + filename);
+	busy = true;
+	if (voiceConnection !== null) {
+		const dispatcher = voiceConnection.playFile(filename, {
+			'volume': volume,
+			'passes': 5
+		});
+		dispatcher.on('end', (reason) => {
+			busy = false;
+			currentPriority = Priority.NONSENSE;
+		});
+		dispatcher.on('error', (error) => {
+			busy = false;
+			currentPriority = Priority.NONSENSE;
+			console.log('Failed to play ' + filename + ':\n' + error);
+		})
+	} else {
+		player.play({
+			'path': filename,
+			'sync': true
+		}).then(() => {
+			busy = false;
+			currentPriority = Priority.NONSENSE;
+		}).catch((error) => {
+			busy = false;
+			currentPriority = Priority.NONSENSE;
+			console.log('Failed to play ' + filename + ' locally;' + error);
+		});
+	}
+}
+
+module.exports.play = async function play(filename, priority = Priority.INFO, delay_ms = 0) {
+	if (muted) return;
+	if (delay_ms > 0) await sleep(delay_ms);
+
+	switch (priority) {
+		case Priority.NONSENSE:
+			if (isBusy()) {
+				playFile(filename, priority, 0.7);
+			}
+			break;
+		case Priority.INFO:
+			if (!isBusy() || priority > currentPriority) {
+				playFile(filename, priority, 0.8);
+			}
+			break;
+		case Priority.EVENTUAL:
+			var tries = 0;
+			while (isBusy() && currentPriority > Priority.NONSENSE) {
+				if (tries > 20) return;
+				await sleep(1000);
+				tries++;
+			}
+			playFile(filename, priority, 0.8);
+			break;
+		case Priority.CRITICAL:
+			playFile(filename, priority, 1);
+			break;
+	}
+
 };
 
 function sleep(ms) {

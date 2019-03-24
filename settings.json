@@ -1,9 +1,11 @@
 {
 	"offline": false,
+	"runTest": false,
 	"secondsPerPoint": 2,
 	"minStartDiff": 3,
+	"startSilenceBuffer": 5,
 	"startTriggerTime": 5,
-	"startDelay": 10,
+	"startDelay": 15,
 	"startMute": false,
 	"crestEnabled": true,
 	"crestTickInterval": 100

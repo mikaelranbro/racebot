@@ -202,7 +202,7 @@ function speakAnnouncements() {
 	var now = moment();
 	if (announcements.length > 0 && voice !== null && now.diff(previousAnnounce) > 5000) {
 		previousAnnounce = moment();
-		voice.speak(announcements.shift());
+		voice.speak(announcements.shift(), voice.Priority.EVENTUAL);
 	}
 }
 
@@ -296,14 +296,16 @@ function changeState(newState, oldTime) {
 
 async function raceLoop() {
 
-	var stateTime = moment();
+	let stateTime = moment();
 	stateTime = changeState(RaceState.PREPARING.WATING_FOR_GAME_START, stateTime);
-	var startDelay = settings.startDelay;
-	var nextStart = 0;
+	let startDelay = settings.startDelay;
+	let nextStart = 0;
 	collectMetrics = false;
 	collectGameState = true;
-	var reminderMoment = null;
-	var welcomeDone = false;
+	let reminderMoment = null;
+	let welcomeDone = false;
+	let explain = true;
+	let nextExplain = 0;
 	while (running) {
 		let elapsed = moment().diff(stateTime); // time in the current state
 		if (!welcomeDone && eventInformation !== null) {
@@ -314,6 +316,7 @@ async function raceLoop() {
 			case RaceState.PREPARING.WATING_FOR_GAME_START:
 				if (currentPCState.gameState !== PC.GameState.GAME_EXITED) {
 					stateTime = changeState(RaceState.PREPARING.WAITING_FOR_RACE_START, stateTime);
+					reminderMoment = moment();
 				} else {
 					speakAnnouncements();
 				}
@@ -323,8 +326,15 @@ async function raceLoop() {
 				if (currentPCState.sessionState === PC.SessionState.SESSION_RACE &&
 					currentPCState.raceState === PC.RaceState.RACESTATE_RACING) {
 					stateTime = changeState(RaceState.PREPARING.CALCULATING, stateTime);
+					nextExplain = 0;
 				} else {
-					speakAnnouncements();
+					var now = moment();
+					if (now.diff(reminderMoment) > 20000) {
+						reminderMoment = now;
+						explainProcedure(nextExplain++);
+					} else {
+						speakAnnouncements();
+					}
 				}
 				break;
 			case RaceState.PREPARING.CALCULATING:
@@ -359,31 +369,41 @@ async function raceLoop() {
 					voice.speak('Everyone in position. Get ready.');
 				} else {
 					var now = moment();
-					if (now.diff(reminderMoment) > 15000) {
+					if (now.diff(reminderMoment) > 30000) {
 						reminderMoment = now;
+						explain = true;
 						checkOrder();
 					} else {
+						if (explain && now.diff(reminderMoment) > 15000) {
+							explainProcedure(nextExplain++);
+							explain = false;
+						}
 						speakAnnouncements();
 					}
 				}
 				break;
 			case RaceState.STARTING.WAITING_FOR_DELAY:
 				metricsInterval = 1000;
-				if (elapsed >= ((startDelay - 4) * 1000)) {
+				if (elapsed >= ((startDelay - settings.startSilenceBuffer) * 1000)) {
 					raceStartMoment = null;
 					stateTime = changeState(RaceState.STARTING.EXECUTING, stateTime);
+					voice.speak('Silence', voice.Priority.CRITICAL, 5);
 				} else {
 					speakAnnouncements();
 				}
 				break;
 			case RaceState.STARTING.EXECUTING:
+				// Entered 4 s before first start
+
 				metricsInterval = 100;
 				if (raceStartMoment === null && elapsed >= (startDelay * 1000)) {
 					raceStartMoment = moment();
 				}
 				if (nextStart < starts.length) {
 					let start = starts[nextStart];
-					if (elapsed >= (start.delay + 1) * 1000) {
+					let startTiming = (start.delay + settings.startSilenceBuffer) * 1000;
+					if (elapsed >= startTiming - 3000) {
+						let leftToStart = startTiming - elapsed;
 						console.log('\n' + elapsed + ':');
 						console.log(start);
 						let names = '';
@@ -396,18 +416,17 @@ async function raceLoop() {
 								names += start.drivers[j].name;
 							}
 							comma = ', '
-							checkStart(start.drivers[j], 3100);
+							checkStart(start.drivers[j], leftToStart + 100);
 						}
-						voice.speak(names, 1 + start.drivers.length);
-						voice.speak('1', 3, 2);
-						voice.speak('Go!', 1, 3, 100);
+						voice.speak(names, voice.Priority.CRITICAL, 1 + start.drivers.length);
+						voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, leftToStart - 1000);
 						nextStart++;
 					}
 					if (nextStart >= starts.length) {
 						startDuration = start.delay * 1000 + 1000;
 					}
 				} else {
-					if (elapsed >= 4000) {
+					if (elapsed >= 3000) {
 						stateTime = changeState(RaceState.RUNNING.SILENT, stateTime);
 					}
 				}
@@ -435,6 +454,34 @@ async function raceLoop() {
 				break;
 		}
 		await sleep(100);
+	}
+}
+
+function explainProcedure(step) {
+	switch (step) {
+		case 0:
+			voice.speak('I will explain the start procedure... When your name is called, you are next and will start within 3 seconds.', voice.Priority.INFO);
+			break;
+		case 1:
+			voice.speak('So,. after your name, there will be two beeps. Start on the second beep.', voice.Priority.EVENTUAL);
+			break;
+		case 2:
+			voice.speak('Take note, the beeps sound like this.', voice.Priority.EVENTUAL);
+			voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
+			break;
+		case 3:
+			voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
+			voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
+			voice.speak('Start on the second one.', voice.Priority.EVENTUAL, 0, 5000);
+			break;
+		case 4:
+			voice.speak('There can be multiple names on the same start time. They all start on the same beeps.', voice.Priority.EVENTUAL);
+			break;
+		case 5:
+			voice.speak('Example.', voice.Priority.EVENTUAL);
+			voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
+			voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, 4000);
+			break;
 	}
 }
 
