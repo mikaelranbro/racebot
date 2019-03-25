@@ -85,7 +85,7 @@ module.exports.getSchedule = function getSchedule() {
 	return output;
 };
 
-module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants = drivers) {
+module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants = null) {
 	var keys = Object.keys(drivers);
 	// console.log('-------------------\nKeys:\n' + keys);
 	//var offset = drivers[keys[nbrDrivers - 1]].points;
@@ -102,7 +102,7 @@ module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants 
 	while (i > 0) {
 		i--;
 		let driver = drivers[keys[i]];
-		if (participants.hasOwnProperty(driver.steamName)) {
+		if (participants === null || participants.hasOwnProperty(driver.steamName)) {
 			if (offset < 0) {
 				offset = driver.points;
 			}

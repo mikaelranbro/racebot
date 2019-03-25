@@ -331,7 +331,7 @@ async function raceLoop() {
 					var now = moment();
 					if (now.diff(reminderMoment) > 20000) {
 						reminderMoment = now;
-						explainProcedure(nextExplain++);
+						// explainProcedure(nextExplain++);
 					} else {
 						speakAnnouncements();
 					}
@@ -464,20 +464,17 @@ function explainProcedure(step) {
 			break;
 		case 1:
 			voice.speak('So,. after your name, there will be two beeps. Start on the second beep.', voice.Priority.EVENTUAL);
+			voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			break;
 		case 2:
-			voice.speak('Take note, the beeps sound like this.', voice.Priority.EVENTUAL);
-			voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
-			break;
-		case 3:
 			voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
 			voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
-			voice.speak('Start on the second one.', voice.Priority.EVENTUAL, 0, 5000);
+			voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
 			break;
-		case 4:
+		case 3:
 			voice.speak('There can be multiple names on the same start time. They all start on the same beeps.', voice.Priority.EVENTUAL);
 			break;
-		case 5:
+		case 4:
 			voice.speak('Example.', voice.Priority.EVENTUAL);
 			voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
 			voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, 4000);

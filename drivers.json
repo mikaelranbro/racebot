@@ -62,5 +62,13 @@
 		"position": 8,
 		"car": null,
 		"sounds": "Row-bert"
+	},
+	"Kevin": {
+		"name": "Kevin",
+		"steamName": "The Real Deal",
+		"points": 0,
+		"position": 9,
+		"car": null,
+		"sounds": "Kevin"
 	}
 }
