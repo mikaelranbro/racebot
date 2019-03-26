@@ -4,7 +4,7 @@
 	"secondsPerPoint": 2,
 	"minStartDiff": 3,
 	"startSilenceBuffer": 5,
-	"startTriggerTime": 5,
+	"startTriggerTime": 3,
 	"startDelay": 15,
 	"startMute": false,
 	"crestEnabled": true,

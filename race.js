@@ -387,7 +387,7 @@ async function raceLoop() {
 				if (elapsed >= ((startDelay - settings.startSilenceBuffer) * 1000)) {
 					raceStartMoment = null;
 					stateTime = changeState(RaceState.STARTING.EXECUTING, stateTime);
-					voice.speak('Silence', voice.Priority.CRITICAL, 5);
+					voice.speak('Silence!', voice.Priority.CRITICAL, 3);
 				} else {
 					speakAnnouncements();
 				}
