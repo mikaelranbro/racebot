@@ -6,6 +6,8 @@ crest/
 
 # Data backup
 backup/
+race_data/*
+race_data.json
 
 # Generated audio
 sound/*.wav

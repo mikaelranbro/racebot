@@ -10,8 +10,10 @@ module.exports.runOffline = function runOffline(bot) {
 	// bot.voice.speak('before');
 	// bot.race.prepare();
 	bot.race.start();
+	//testStartFinish(bot);
 	// bot.voice.play('sfx/start_2_1.wav');
 	// testSpeech(bot);
+	// testStartAbort(bot);
 };
 
 async function testSpeech(bot) {
@@ -31,6 +33,38 @@ async function testSounds(bot) {
 	bot.voice.play('sfx/start_2_1.wav', voice.Priority.CRITICAL);
 	await sleep(500);
 	bot.voice.play('sfx/honk.wav', voice.Priority.EVENTUAL);
+}
+
+async function testStartAbort(bot) {
+	console.log('0: ' + bot.race.getState());
+	bot.race.start();
+	await sleep(200);
+	console.log('1: ' + bot.race.getState());
+	bot.race.abort();
+	await sleep(200);
+	console.log('2: ' + bot.race.getState());
+	bot.race.abort();
+	await sleep(200);
+	console.log('3: ' + bot.race.getState());
+	bot.race.start();
+	await sleep(200);
+	console.log('4: ' + bot.race.getState());
+	bot.race.start();
+	await sleep(200);
+	console.log('5: ' + bot.race.getState());
+	bot.race.abort();
+	await sleep(200);
+	console.log('6: ' + bot.race.getState());
+	await sleep(5000);
+	console.log('7: ' + bot.race.getState());
+}
+
+async function testStartFinish(bot) {
+	console.log('***** Starting *****');
+	bot.race.start();
+	await sleep(35000);
+	console.log('***** Aborting *****');
+	bot.race.abort();
 }
 
 function sleep(ms) {

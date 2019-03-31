@@ -49,23 +49,7 @@ client.once('ready', () => {
 			}
 		});
 	});
-	ready = true;
-	if (voiceChannel === null) {
-		console.error('Unable to find voice channel "pCars".');
-		ready = false;
-	} else {
-		voiceChannel.join()
-			.then(connection => {
-				voiceConnection = connection;
-				voice.setConnection(connection);
-				console.log('Joined voice channel.');
-				if (!hasAnnouncedSelf) {
-					voice.speak("Racing-bot online.");
-					hasAnnouncedSelf = true;
-				}
-			})
-			.catch(console.log);
-	}
+	joinVoiceChannel();
 	if (textChannel === null) {
 		console.error('Unable to find text channel "racecontrol".');
 		ready = false;
@@ -76,6 +60,30 @@ client.once('ready', () => {
 	}
 });
 
+function joinVoiceChannel() {
+	ready = true;
+	if (voiceChannel === null) {
+		console.error('Unable to find voice channel "pCars".');
+		ready = false;
+	} else {
+		voiceChannel.join()
+			.then(connection => {
+				voiceConnection = connection;
+				voiceConnection.on('error', error => {
+					client.log(error);
+					joinVoiceChannel();
+				});
+				voice.setConnection(connection);
+				console.log('Joined voice channel.');
+				if (!hasAnnouncedSelf) {
+					voice.speak("Racing-bot online.");
+					hasAnnouncedSelf = true;
+				}
+			})
+			.catch(console.log);
+	}
+}
+
 client.on('voiceStateUpdate', (oldMember, newMember) => {
 	if (newMember.user.id === client.user.id) {
 		return;
@@ -85,7 +93,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 	}
 	if (newMember.voiceChannel === voiceChannel) {
 		console.log(newMember.user.username + " joined channel.");
-		voice.speak("Hey, " + newMember.user.username);
+		// voice.speak("Hey, " + newMember.user.username);
 	}
 });
 

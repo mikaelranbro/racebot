@@ -1,12 +1,62 @@
 {
-	"1": {"date": "20190319T2030", "track": "Sonoma Raceway GP", "laps" : 7, "state": "finished"},
-	"2": {"date": "20190326T2030", "track": "Nurburgring GP", "laps" : 7, "state": "upcoming"},
-	"3": {"date": "20190402T2030", "track": "Sakitto GP", "laps" : 7, "state": "upcoming"},
-	"4": {"date": "20190409T2030", "track": "Donington Park GP", "laps" : 7, "state": "upcoming"},
-	"5": {"date": "20190416T2030", "track": "Watkins Glen GP", "laps" : 7, "state": "upcoming"},
-	"6": {"date": "20190423T2030", "track": "Algarve", "laps" : 7, "state": "upcoming"},
-	"7": {"date": "20190430T2030", "track": "Brands Hatch GP", "laps" : 7, "state": "upcoming"},
-	"8": {"date": "20190507T2030", "track": "Red Bull Ring GP", "laps" : 7, "state": "upcoming"},
-	"9": {"date": "20190514T2030", "track": "Dubai Autodrome GP", "laps" : 7, "state": "upcoming"},
-	"10": {"date": "20190521T2030", "track": "SPA-Francorchamps", "laps" : 7, "state": "upcoming"}
+	"1": {
+		"date": "20190319T2030",
+		"track": "Sonoma Raceway GP",
+		"laps": 7,
+		"state": "finished"
+	},
+	"2": {
+		"date": "20190326T2030",
+		"track": "Nurburgring GP",
+		"laps": 7,
+		"state": "finished"
+	},
+	"3": {
+		"date": "20190402T2030",
+		"track": "Sakitto GP",
+		"laps": 7,
+		"state": "upcoming"
+	},
+	"4": {
+		"date": "20190409T2030",
+		"track": "Donington Park GP",
+		"laps": 7,
+		"state": "upcoming"
+	},
+	"5": {
+		"date": "20190416T2030",
+		"track": "Watkins Glen GP",
+		"laps": 7,
+		"state": "upcoming"
+	},
+	"6": {
+		"date": "20190423T2030",
+		"track": "Algarve",
+		"laps": 7,
+		"state": "upcoming"
+	},
+	"7": {
+		"date": "20190430T2030",
+		"track": "Brands Hatch GP",
+		"laps": 7,
+		"state": "upcoming"
+	},
+	"8": {
+		"date": "20190507T2030",
+		"track": "Red Bull Ring GP",
+		"laps": 7,
+		"state": "upcoming"
+	},
+	"9": {
+		"date": "20190514T2030",
+		"track": "Dubai Autodrome GP",
+		"laps": 7,
+		"state": "upcoming"
+	},
+	"10": {
+		"date": "20190521T2030",
+		"track": "SPA-Francorchamps",
+		"laps": 7,
+		"state": "upcoming"
+	}
 }

@@ -2,7 +2,7 @@
 	"veloxieer": {
 		"name": "veloxieer",
 		"steamName": "veloxieer",
-		"points": 10,
+		"points": 20,
 		"position": 1,
 		"car": null,
 		"sounds": "veloxieer"
@@ -10,7 +10,7 @@
 	"borbo": {
 		"name": "borbo",
 		"steamName": "Borbo",
-		"points": 8,
+		"points": 15,
 		"position": 2,
 		"car": null,
 		"sounds": "Boarboo"
@@ -18,39 +18,39 @@
 	"Mikael": {
 		"name": "Mikael",
 		"steamName": "Mikael",
-		"points": 7,
-		"position": 3,
+		"points": 10,
+		"position": 4,
 		"car": null,
 		"sounds": "Mee-kell"
 	},
 	"Sadjev": {
 		"name": "Sadjev",
 		"steamName": "Sadjev",
-		"points": 6,
-		"position": 4,
+		"points": 12,
+		"position": 3,
 		"car": null,
 		"sounds": "Zadj-eve"
 	},
 	"Rymdkatten": {
 		"name": "Rymdkatten",
 		"steamName": "Rymdkatten",
-		"points": 5,
+		"points": 10,
 		"position": 5,
 		"car": null,
 		"sounds": "Riymdkattene"
 	},
 	"Staffan": {
 		"name": "Staffan",
-		"steamName": "Staffan",
-		"points": 4,
-		"position": 6,
+		"steamName": "staffan",
+		"points": 5,
+		"position": 8,
 		"car": null,
 		"sounds": "Stuff-anne"
 	},
 	"Håkan": {
 		"name": "Håkan",
-		"steamName": "magnavenatus",
-		"points": 3,
+		"steamName": "Håkan",
+		"points": 7,
 		"position": 7,
 		"car": null,
 		"sounds": "Hawk-anne"
@@ -58,16 +58,16 @@
 	"Robert": {
 		"name": "Robert",
 		"steamName": "robert_lindh",
-		"points": 2,
-		"position": 8,
+		"points": 4,
+		"position": 9,
 		"car": null,
 		"sounds": "Row-bert"
 	},
 	"Kevin": {
 		"name": "Kevin",
 		"steamName": "The Real Deal",
-		"points": 0,
-		"position": 9,
+		"points": 8,
+		"position": 6,
 		"car": null,
 		"sounds": "Kevin"
 	}

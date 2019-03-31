@@ -59,6 +59,7 @@ module.exports.unMute = function unMute() {
 
 module.exports.setConnection = function setConnection(voiceConnection_) {
 	voiceConnection = voiceConnection_;
+	voiceConnection.on('error', )
 }
 
 module.exports.setDrivers = function setDrivers(drivers_) {
@@ -233,6 +234,24 @@ module.exports.play = async function play(filename, priority = Priority.INFO, de
 	}
 
 };
+
+module.exports.getPosition = function getPosition(pos, max) {
+	if (pos === max) {
+		return 'last';
+	}
+	switch (pos) {
+		case 0:
+			return 'unknown';
+		case 1:
+			return '1st';
+		case 2:
+			return '2nd';
+		case 3:
+			return '3rd';
+		default:
+			return 'on ' + pos + 'th place';
+	}
+}
 
 function sleep(ms) {
 	return new Promise(resolve => {
