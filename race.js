@@ -142,24 +142,25 @@ function getEventInformation() {
 
 function prepareParticipants(data, minDiff) {
 	for (var i = 0; i < data.mNumParticipants; i++) {
-		if (typeof steamToDiscord[data.mParticipantInfo[i].mName] === undefined) {
-			console.log('Unknown participant "' + data.mParticipantInfo[i].mName + '"');
+		var name = 'unknown';
+		if (steamToDiscord.hasOwnProperty(data.mParticipantInfo[i].mName)) {
+			name = steamToDiscord[data.mParticipantInfo[i].mName];
 		} else {
-			var steam = data.mParticipantInfo[i].mName;
-			var name = steamToDiscord[data.mParticipantInfo[i].mName];
-			participants[steam] = {};
-			participants[steam].name = name;
-			participants[steam].steamName = steam;
-			participants[steam].speed = 0;
-			participants[steam].currentLap = 0;
-			participants[steam].completedLaps = 0;
-			participants[steam].position = 0;
-			participants[steam].lapDistance = 0;
-			participants[steam].hasFinished = false;
+			console.log('Unknown participant "' + data.mParticipantInfo[i].mName + '"');
+			name = data.mParticipantInfo[i].mName;
 		}
+		var steam = data.mParticipantInfo[i].mName;
+		participants[steam] = {};
+		participants[steam].name = name;
+		participants[steam].steamName = steam;
+		participants[steam].speed = 0;
+		participants[steam].currentLap = 0;
+		participants[steam].completedLaps = 0;
+		participants[steam].position = 0;
+		participants[steam].lapDistance = 0;
+		participants[steam].hasFinished = false;
 	}
 	nbrParticipants = data.mNumParticipants;
-
 
 	startOrder = [];
 	starts = season.getStartOrder(minDiff, participants);
@@ -455,17 +456,13 @@ async function raceLoop() {
 					}
 				}
 				let stillRacing = false;
-				let someOneFinished = false;
 				Object.keys(participants).forEach((steamName) => {
 					let p = participants[steamName];
 					if (p.raceState === PC.RaceState.RACESTATE_RACING) {
 						stillRacing = true;
-					} else {
-						if (p.hasFinished = false) {
-							p.hasFinished = true;
-							someOneFinished = true;
-							voice.speak(p.sounds + ' has finished ' + voice.getPosition(p.position, nbrParticipants), voice.Priority.EVENTUAL);
-						}
+					} else if (p.hasFinished === false) {
+						p.hasFinished = true;
+						voice.speak(p.name + ' has finished ' + voice.getPosition(p.position, nbrParticipants), voice.Priority.EVENTUAL);
 					}
 				});
 				if (stillRacing) {
