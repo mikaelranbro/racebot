@@ -1,6 +1,8 @@
-# racebot
+# Racebot
 RaceBot - waving a flag and stuff
 
+### Commands
+```
 !help - display this text.
 !status - display championship standings etc.
 !register <steam name> <pronounciation> - register for the championship and tell the bot how to pronounce your name
@@ -12,3 +14,4 @@ RaceBot - waving a flag and stuff
 !mute - silence the bot
 !unmute - unsilence the bot
 !honk - wake people up
+```
