@@ -205,8 +205,12 @@ module.exports.start = async function start() {
 };
 
 module.exports.abort = async function abort() {
+	running = false;
+	if (settings.crestEnabled && crestPromise !== null) {
+		await crestPromise;
+		crestPromise = null;
+	}
 	if (racePromise !== null) {
-		running = false;
 		await racePromise;
 		raceData.close();
 		console.log('>------------------ Race aborted ------------------<');
@@ -290,9 +294,8 @@ async function crestLoop() {
 						participants[p.mParticipantInfo[i].mName].car = p.mParticipantInfo[i].mCarNames;
 						participants[p.mParticipantInfo[i].mName].raceState = p.mParticipantInfo[i].mRaceStates;
 					}
-
 					if (raceOngoing && settings.saveRaceData) {
-						raceData.process(moment().diff(raceStartMoment), p.mParticipantInfo);
+						raceData.tick(moment().diff(raceStartMoment), p.mParticipantInfo);
 					}
 				}).catch(error => {
 					// console.log(error);
@@ -442,13 +445,13 @@ async function raceLoop() {
 				}
 				break;
 			case RaceState.RUNNING.SILENT:
-				metricsInterval = 1000;
+				metricsInterval = settings.metricsInterval;
 				if (elapsed > 10000) {
 					stateTime = changeState(RaceState.RUNNING.LOUD, stateTime);
 				}
 				break;
 			case RaceState.RUNNING.LOUD:
-				metricsInterval = 1000;
+				metricsInterval = settings.metricsInterval;
 				if (!hasDeclaredFalseStarts) {
 					hasDeclaredFalseStarts = true;
 					if (raceData.penalties.length === 0) {
@@ -470,6 +473,7 @@ async function raceLoop() {
 				} else {
 					console.log('Race finished. Game RaceState: ' + currentPCState.raceState);
 					stateTime = changeState(RaceState.FINISHING.UPDATING_STANDINGS, stateTime);
+					raceOngoing = false;
 				}
 				break;
 			case RaceState.FINISHING.UPDATING_STANDINGS:
@@ -543,24 +547,26 @@ function executeStart(start, leftToStart) {
 function explainProcedure(step) {
 	switch (step) {
 		case 0:
-			voice.speak('I will explain the start procedure... When your name is called, you are next and will start within 3 seconds.', voice.Priority.INFO);
+			voice.speak('You should know the start procedure by now... Name, beeps, drive.');
+			// voice.speak('I will explain the start procedure... When your name is called, you are next and will start within 3 seconds.', voice.Priority.INFO);
 			break;
 		case 1:
-			voice.speak('So,. after your name, there will be two beeps. Start on the second beep.', voice.Priority.EVENTUAL);
-			voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
+			voice.speak('Zadj-eve, go quicker this time.');
+			//voice.speak('So,. after your name, there will be two beeps. Start on the second beep.', voice.Priority.EVENTUAL);
+			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			break;
 		case 2:
-			voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
-			voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
-			voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
+			//voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
+			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
+			//voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
 			break;
 		case 3:
-			voice.speak('There can be multiple names on the same start time. They all start on the same beeps.', voice.Priority.EVENTUAL);
+			//voice.speak('There can be multiple names on the same start time. They all start on the same beeps.', voice.Priority.EVENTUAL);
 			break;
 		case 4:
-			voice.speak('Example.', voice.Priority.EVENTUAL);
-			voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
-			voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, 4000);
+			//voice.speak('Example.', voice.Priority.EVENTUAL);
+			//voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
+			//voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, 4000);
 			break;
 	}
 }

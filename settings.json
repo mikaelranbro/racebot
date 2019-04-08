@@ -1,14 +1,15 @@
 {
-	"offline": true,
+	"offline": false,
 	"runTest": false,
 	"secondsPerPoint": 2,
 	"minStartDiff": 3,
 	"startSilenceBuffer": 5,
-	"startTriggerTime": 0,
+	"startTriggerTime": 4,
 	"startDelay": 15,
 	"startMute": false,
 	"crestEnabled": true,
-	"crestTickInterval": 100,
+	"crestTickInterval": 50,
 	"saveRaceData": true,
+	"savePositions": false,
 	"nbrFormationLaps": 0
 }

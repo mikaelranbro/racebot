@@ -19,6 +19,7 @@ speak file "c:\temp\speak1.txt" 0 100 "c:\temp\speak.wav" 48kHz16BitStereo
 const fs = require('fs');
 const player = require('node-wav-player');
 const settings = require('./settings.json');
+const moment = require('moment');
 var execFile = require('child_process').execFile;
 var voiceConnection = null;
 var drivers = null;
@@ -59,7 +60,6 @@ module.exports.unMute = function unMute() {
 
 module.exports.setConnection = function setConnection(voiceConnection_) {
 	voiceConnection = voiceConnection_;
-	voiceConnection.on('error', )
 }
 
 module.exports.setDrivers = function setDrivers(drivers_) {
@@ -235,6 +235,82 @@ module.exports.play = async function play(filename, priority = Priority.INFO, de
 
 };
 
+
+module.exports.greet = function greet(driver) {
+	let now = moment();
+	let sinceGreet = now.diff(moment(driver.greeted));
+	let sinceSeen = now.diff(moment(driver.seen));
+	driver.seen = now.format('YYYYMMDDTHHmmss');
+	if (sinceGreet < 400000 || sinceSeen < 60000) {
+		console.log('Not greeting ' + driver.name + ' Time since last greet: ' + sinceGreet + ', since seen: ' + sinceSeen);
+		return false;
+	} else {
+		console.log('Greeting ' + driver.name);
+		let text = '';
+		driver.greeted = now.format('YYYYMMDDTHHmmss');
+		if (sinceSeen < 8000000) {
+			let d = dice(3);
+			switch (d) {
+				case 1:
+					text = 'Welcome back ' + driver.sounds + '.';
+					break;
+				case 2:
+					text = 'Hello again ' + driver.sounds + '.';
+					break;
+				case 3:
+					text = 'Hi again, ' + driver.sounds + '.';
+					break;
+			}
+		} else {
+			text = getGreeting(driver);
+			if (sinceGreet > 700000000 && sinceSeen > 700000000) {
+				// more than a week
+				let d = dice(6);
+				switch (d) {
+					case 1:
+						text += ' I missed you.';
+						break;
+					case 2:
+						text += ' Finally, you are back.';
+						break;
+					case 3:
+						text += ' Long time no see.';
+						break;
+					case 4:
+						text += ' I havent seen you in a while.';
+						break;
+					case 5:
+						text += ' I remember you.'
+						break;
+					case 6:
+						text += ' You are back!'
+						break;
+				}
+			}
+		}
+		this.speak(text);
+		return true;
+	}
+}
+
+function getGreeting(driver) {
+	let d = dice(4);
+	switch (d) {
+		case 1:
+			return "Hey " + driver.sounds + '.';
+		case 2:
+			return "Hello, " + driver.sounds + '.';
+		case 3:
+			return "Welcome, " + driver.sounds + '.';
+		case 4:
+			return "Greetings, " + driver.sounds + '.';
+		default:
+			console.error('Unknown outcome: ' + d);
+			break;
+	}
+}
+
+
 module.exports.getPosition = function getPosition(pos, max) {
 	if (pos === max) {
 		return 'last';
@@ -257,4 +333,8 @@ function sleep(ms) {
 	return new Promise(resolve => {
 		setTimeout(resolve, ms)
 	})
+}
+
+function dice(n) {
+	return Math.floor((Math.random() * n) + 1);
 }

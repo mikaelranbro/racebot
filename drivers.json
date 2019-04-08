@@ -2,73 +2,91 @@
 	"veloxieer": {
 		"name": "veloxieer",
 		"steamName": "veloxieer",
-		"points": 20,
+		"points": 24,
 		"position": 1,
 		"car": null,
-		"sounds": "veloxieer"
+		"sounds": "veloxieer",
+		"seen": "20190408T201448",
+		"greeted": "20190408T201448"
 	},
 	"borbo": {
 		"name": "borbo",
 		"steamName": "Borbo",
-		"points": 15,
+		"points": 23,
 		"position": 2,
 		"car": null,
-		"sounds": "Boarboo"
-	},
-	"Mikael": {
-		"name": "Mikael",
-		"steamName": "Mikael",
-		"points": 10,
-		"position": 4,
-		"car": null,
-		"sounds": "Mee-kell"
+		"sounds": "Boarboo",
+		"seen": "20190406T225621",
+		"greeted": "20190406T225621"
 	},
 	"Sadjev": {
 		"name": "Sadjev",
 		"steamName": "Sadjev",
-		"points": 12,
+		"points": 19,
 		"position": 3,
 		"car": null,
-		"sounds": "Zadj-eve"
+		"sounds": "Zadj-eve",
+		"seen": "20190408T204608",
+		"greeted": "20190408T204608"
+	},
+	"Kevin": {
+		"name": "Kevin",
+		"steamName": "The Real Deal",
+		"points": 18,
+		"position": 4,
+		"car": null,
+		"sounds": "Kevin",
+		"seen": "20190402T213000",
+		"greeted": "20190402T213000"
+	},
+	"Mikael": {
+		"name": "Mikael",
+		"steamName": "Mikael",
+		"points": 16,
+		"position": 5,
+		"car": null,
+		"sounds": "Mee-kell",
+		"seen": "20190406T120513",
+		"greeted": "20190406T120513"
+	},
+	"Håkan": {
+		"name": "Håkan",
+		"steamName": "Håkan",
+		"points": 12,
+		"position": 6,
+		"car": null,
+		"sounds": "Hawk-anne",
+		"seen": "20190402T213000",
+		"greeted": "20190402T213000"
 	},
 	"Rymdkatten": {
 		"name": "Rymdkatten",
 		"steamName": "Rymdkatten",
 		"points": 10,
-		"position": 5,
-		"car": null,
-		"sounds": "Riymdkattene"
-	},
-	"Staffan": {
-		"name": "Staffan",
-		"steamName": "staffan",
-		"points": 5,
-		"position": 8,
-		"car": null,
-		"sounds": "Stuff-anne"
-	},
-	"Håkan": {
-		"name": "Håkan",
-		"steamName": "Håkan",
-		"points": 7,
 		"position": 7,
 		"car": null,
-		"sounds": "Hawk-anne"
+		"sounds": "Riymdkattene",
+		"seen": "20190402T213000",
+		"greeted": "20190402T213000"
 	},
 	"Robert": {
 		"name": "Robert",
 		"steamName": "robert_lindh",
-		"points": 4,
+		"points": 7,
+		"position": 8,
+		"car": null,
+		"sounds": "Row-bert",
+		"seen": "20190402T213000",
+		"greeted": "20190402T213000"
+	},
+	"Staffan": {
+		"name": "Staffan",
+		"steamName": "staffan",
+		"points": 7,
 		"position": 9,
 		"car": null,
-		"sounds": "Row-bert"
-	},
-	"Kevin": {
-		"name": "Kevin",
-		"steamName": "The Real Deal",
-		"points": 8,
-		"position": 6,
-		"car": null,
-		"sounds": "Kevin"
+		"sounds": "Stuff-anne",
+		"seen": "20190402T213000",
+		"greeted": "20190402T213000"
 	}
 }

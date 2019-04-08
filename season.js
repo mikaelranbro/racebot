@@ -85,6 +85,19 @@ module.exports.getSchedule = function getSchedule() {
 	return output;
 };
 
+module.exports.getDriver = function(name) {
+	if (drivers.hasOwnProperty(name)) {
+		return drivers[name];
+	} else {
+		Object.keys(drivers).forEach((key) => {
+			if (drivers[key].steamName.toLowerCase() === name.toLowerCase() ||
+				key.toLowerCase() === name.toLowerCase()) {
+				return drivers[key];
+			}
+		});
+	}
+}
+
 module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants = null) {
 	var keys = Object.keys(drivers);
 	// console.log('-------------------\nKeys:\n' + keys);
@@ -133,6 +146,7 @@ module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants 
 module.exports.register = function register(user, steamName, sounds) {
 	console.log('Registring user ' + user.username + ' as ' + steamName + ', ' + sounds);
 	var driver;
+	let now = moment();
 	if (drivers.hasOwnProperty(user.username)) {
 		driver = drivers[user.username];
 	} else {
@@ -143,6 +157,8 @@ module.exports.register = function register(user, steamName, sounds) {
 		drivers[user.username].position = Object.keys(drivers).length;
 		drivers[user.username].car = null;
 		drivers[user.username].sounds = user.username;
+		drivers[user.username].seen = now.format('YYYYMMDDTHHmmss');
+		drivers[user.username].greeted = now.format('YYYYMMDDTHHmmss');
 		driver = drivers[user.username];
 	}
 	if (steamName !== undefined) {
@@ -152,9 +168,14 @@ module.exports.register = function register(user, steamName, sounds) {
 		driver.sounds = sounds;
 	}
 	nbrDrivers = Object.keys(drivers).length;
+	this.save();
+};
+
+module.exports.save = function save() {
 	fs.writeFile('drivers.json', JSON.stringify(drivers, null, '\t'), 'utf8', (err) => {
 		if (err) throw err;
 		console.log('Saved "drivers.json"');
 	});
-};
+}
+
 //console.log(module.exports.getSchedule());

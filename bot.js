@@ -93,6 +93,9 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 	}
 	if (newMember.voiceChannel === voiceChannel) {
 		console.log(newMember.user.username + " joined channel.");
+		if (voice.greet(season.getDriver(newMember.user.username))) {
+			season.save();
+		}
 		// voice.speak("Hey, " + newMember.user.username);
 	}
 });
