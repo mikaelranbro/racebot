@@ -1,92 +1,101 @@
 {
-	"veloxieer": {
-		"name": "veloxieer",
-		"steamName": "veloxieer",
-		"points": 24,
-		"position": 1,
-		"car": null,
-		"sounds": "veloxieer",
-		"seen": "20190408T201448",
-		"greeted": "20190408T201448"
-	},
 	"borbo": {
 		"name": "borbo",
 		"steamName": "Borbo",
-		"points": 23,
-		"position": 2,
+		"points": 30,
+		"position": 1,
 		"car": null,
 		"sounds": "Boarboo",
-		"seen": "20190406T225621",
-		"greeted": "20190406T225621"
+		"seen": "20190409T204232",
+		"greeted": "20190409T204232",
+		"startPosition": 9
+	},
+	"veloxieer": {
+		"name": "veloxieer",
+		"steamName": "veloxieer",
+		"points": 29,
+		"position": 2,
+		"car": null,
+		"sounds": "veloxieer",
+		"seen": "20190409T205919",
+		"greeted": "20190409T205919",
+		"startPosition": 8
+	},
+	"kevinneriksson": {
+		"name": "kevinneriksson",
+		"steamName": "The Real Deal",
+		"points": 26,
+		"position": 3,
+		"car": null,
+		"sounds": "Kevin",
+		"seen": "20190402T213000",
+		"greeted": "20190402T213000",
+		"startPosition": 7
 	},
 	"Sadjev": {
 		"name": "Sadjev",
 		"steamName": "Sadjev",
-		"points": 19,
-		"position": 3,
-		"car": null,
-		"sounds": "Zadj-eve",
-		"seen": "20190408T204608",
-		"greeted": "20190408T204608"
-	},
-	"Kevin": {
-		"name": "Kevin",
-		"steamName": "The Real Deal",
-		"points": 18,
+		"points": 25,
 		"position": 4,
 		"car": null,
-		"sounds": "Kevin",
-		"seen": "20190402T213000",
-		"greeted": "20190402T213000"
-	},
-	"Mikael": {
-		"name": "Mikael",
-		"steamName": "Mikael",
-		"points": 16,
-		"position": 5,
-		"car": null,
-		"sounds": "Mee-kell",
-		"seen": "20190406T120513",
-		"greeted": "20190406T120513"
-	},
-	"Håkan": {
-		"name": "Håkan",
-		"steamName": "Håkan",
-		"points": 12,
-		"position": 6,
-		"car": null,
-		"sounds": "Hawk-anne",
-		"seen": "20190402T213000",
-		"greeted": "20190402T213000"
+		"sounds": "Zadj-eve",
+		"seen": "20190410T000736",
+		"greeted": "20190410T000736",
+		"startPosition": 6
 	},
 	"Rymdkatten": {
 		"name": "Rymdkatten",
 		"steamName": "Rymdkatten",
-		"points": 10,
-		"position": 7,
+		"points": 20,
+		"position": 5,
 		"car": null,
 		"sounds": "Riymdkattene",
+		"seen": "20190409T205638",
+		"greeted": "20190409T205638",
+		"startPosition": 5
+	},
+	"Mikael": {
+		"name": "Mikael",
+		"steamName": "Mikael",
+		"points": 19,
+		"position": 6,
+		"car": null,
+		"sounds": "Mee-kell",
+		"seen": "20190410T200108",
+		"greeted": "20190410T200108",
+		"startPosition": 4
+	},
+	"Håkan": {
+		"name": "Håkan",
+		"steamName": "Håkan",
+		"points": 16,
+		"position": 7,
+		"car": null,
+		"sounds": "Hawk-anne",
+		"seen": "20190409T210215",
+		"greeted": "20190409T210215",
+		"startPosition": 3
+	},
+	"staffan": {
+		"name": "staffan",
+		"steamName": "staffan",
+		"points": 9,
+		"position": 8,
+		"car": null,
+		"sounds": "Stuff-anne",
 		"seen": "20190402T213000",
-		"greeted": "20190402T213000"
+		"greeted": "20190402T213000",
+		"startPosition": 2
 	},
 	"Robert": {
 		"name": "Robert",
 		"steamName": "robert_lindh",
 		"points": 7,
-		"position": 8,
+		"position": 9,
 		"car": null,
 		"sounds": "Row-bert",
 		"seen": "20190402T213000",
-		"greeted": "20190402T213000"
-	},
-	"Staffan": {
-		"name": "Staffan",
-		"steamName": "staffan",
-		"points": 7,
-		"position": 9,
-		"car": null,
-		"sounds": "Stuff-anne",
-		"seen": "20190402T213000",
-		"greeted": "20190402T213000"
+		"greeted": "20190402T213000",
+		"startPosition": 1
 	}
 }

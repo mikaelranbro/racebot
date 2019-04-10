@@ -235,9 +235,12 @@ module.exports.play = async function play(filename, priority = Priority.INFO, de
 
 };
 
+module.exports.handleOtherSpeaking = function(user, speaking) {};
+
 
 module.exports.greet = function greet(driver) {
 	let now = moment();
+	if (typeof(driver) === 'undefined' || driver === null) return;
 	let sinceGreet = now.diff(moment(driver.greeted));
 	let sinceSeen = now.diff(moment(driver.seen));
 	driver.seen = now.format('YYYYMMDDTHHmmss');

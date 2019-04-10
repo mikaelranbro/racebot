@@ -5,6 +5,7 @@ const settings = require('./settings.json');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const auth = require('./authorization.json');
+const moment = require('moment');
 module.exports.voice = voice = require('./voice.js');
 module.exports.season = season = require('./season.js');
 module.exports.race = race = require('./race.js');
@@ -28,6 +29,30 @@ const helpString = '\
 \n !mute - silence the bot\
 \n !unmute - unsilence the bot\
 \n !honk - wake people up';
+
+let shuttingDown = false;
+let nbrDriversInChannel = 0;
+async function discordLoop() {
+	while (!shuttingDown) {
+		if (voiceChannel !== null) {
+			let nbrDrivers = 0;
+			let nbrMembers = 0;
+			voiceChannel.members.forEach((member, key, map) => {
+				let driver = season.getDriver(member.user.username);
+				if (typeof(driver) !== 'undefined' && driver !== null) {
+					driver.seen = moment().format('YYYYMMDDTHHmmss');
+					nbrDrivers++;
+				}
+				nbrMembers++;
+			});
+			if (nbrDrivers !== nbrDriversInChannel) {
+				console.log(nbrDrivers + ' drivers present.');
+				nbrDriversInChannel = nbrDrivers;
+			}
+		}
+		await sleep(1000);
+	}
+}
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
@@ -58,6 +83,7 @@ client.once('ready', () => {
 		race.init(voice, textChannel, season);
 		console.log('Ready.');
 	}
+	discordLoop();
 });
 
 function joinVoiceChannel() {
@@ -70,8 +96,12 @@ function joinVoiceChannel() {
 			.then(connection => {
 				voiceConnection = connection;
 				voiceConnection.on('error', error => {
-					client.log(error);
-					joinVoiceChannel();
+					console.log('********** ERROR in voiceConnection ************\n' + error);
+					voiceConnection = null;
+					reJoinVoiceChannel();
+				});
+				voiceConnection.on('speaking', (user, speaking) => {
+					voice.handleOtherSpeaking(user, speaking);
 				});
 				voice.setConnection(connection);
 				console.log('Joined voice channel.');
@@ -84,6 +114,11 @@ function joinVoiceChannel() {
 	}
 }
 
+async function reJoinVoiceChannel() {
+	await sleep(1000);
+	joinVoiceChannel();
+}
+
 client.on('voiceStateUpdate', (oldMember, newMember) => {
 	if (newMember.user.id === client.user.id) {
 		return;
@@ -91,7 +126,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 	if (voiceConnection === null) {
 		return;
 	}
-	if (newMember.voiceChannel === voiceChannel) {
+	if (newMember.voiceChannel === voiceChannel && oldMember.voiceChannel !== voiceChannel) {
 		console.log(newMember.user.username + " joined channel.");
 		if (voice.greet(season.getDriver(newMember.user.username))) {
 			season.save();
@@ -101,9 +136,10 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 });
 
 client.on('error', error => {
-	console.log(error);
+	console.log('******* ERROR in client *******\n' + error);
 	client.login();
 });
+
 
 client.on('message', message => {
 	if (message.author.bot) {
@@ -233,6 +269,7 @@ if (process.platform === "win32") {
 
 process.on("SIGINT", function() {
 	//graceful shutdown
+	shuttingDown = true;
 	if (!settings.offline) {
 		voiceConnection.disconnect();
 	}

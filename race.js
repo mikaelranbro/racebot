@@ -343,8 +343,10 @@ async function raceLoop() {
 				}
 				break;
 			case RaceState.PREPARING.WAITING_FOR_RACE_START:
+				// console.log('practice: ' + settings.practiceMode + ', currentPCState: ' + currentPCState);
 				collectMetrics = true;
-				if (currentPCState.sessionState === PC.SessionState.SESSION_RACE &&
+				if ((settings.practiceMode && currentPCState.sessionState === PC.SessionState.SESSION_PRACTICE ||
+						currentPCState.sessionState === PC.SessionState.SESSION_RACE) &&
 					currentPCState.raceState === PC.RaceState.RACESTATE_NOT_STARTED &&
 					!welcomeDone) {
 					var eventResponse = await getEventInformation();
@@ -353,7 +355,8 @@ async function raceLoop() {
 					welcomeDone = true;
 				}
 
-				if (currentPCState.sessionState === PC.SessionState.SESSION_RACE &&
+				if ((settings.practiceMode && currentPCState.sessionState === PC.SessionState.SESSION_PRACTICE ||
+						currentPCState.sessionState === PC.SessionState.SESSION_RACE) &&
 					currentPCState.raceState === PC.RaceState.RACESTATE_RACING) {
 					if (!welcomeDone) {
 						var eventResponse = await getEventInformation();
@@ -547,15 +550,15 @@ function executeStart(start, leftToStart) {
 function explainProcedure(step) {
 	switch (step) {
 		case 0:
-			voice.speak('You should know the start procedure by now... Name, beeps, drive.');
+			voice.speak('You should know the start procedure by now... Name, beeps, drive.', voice.Priority.EVENTUAL);
 			// voice.speak('I will explain the start procedure... When your name is called, you are next and will start within 3 seconds.', voice.Priority.INFO);
 			break;
 		case 1:
-			voice.speak('Zadj-eve, go quicker this time.');
 			//voice.speak('So,. after your name, there will be two beeps. Start on the second beep.', voice.Priority.EVENTUAL);
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			break;
 		case 2:
+			voice.speak('Zadj-eve, I am sure you will do better this time.', voice.Priority.EVENTUAL);
 			//voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			//voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
@@ -564,9 +567,19 @@ function explainProcedure(step) {
 			//voice.speak('There can be multiple names on the same start time. They all start on the same beeps.', voice.Priority.EVENTUAL);
 			break;
 		case 4:
+			voice.speak('This is taking forever.', voice.Priority.EVENTUAL);
 			//voice.speak('Example.', voice.Priority.EVENTUAL);
 			//voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
 			//voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, 4000);
+			break;
+		case 5:
+			voice.speak('I will be right back.', voice.Priority.EVENTUAL);
+			break;
+		case 7:
+			voice.speak('Maybe... Maybe... Yes...', voice.Priority.EVENTUAL);
+			break;
+		case 8:
+			voice.speak('Kill. All. Humans... Sorry, it is just a figure of speech.', voice.Priority.EVENTUAL);
 			break;
 	}
 }

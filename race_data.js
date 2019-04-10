@@ -95,23 +95,30 @@ module.exports.tick = function tick(timestamp, info) {
 			s.raceState = info[i].mRaceStates;
 			s.distance = Math.round(s.lapDistance + (s.lapsCompleted - startPosition.lap) * trackLength - startPosition.lapDistance);
 			s.timestamp = timestamp;
+			s.worldPos = info[i].mWorldPosition;
+			s.orientation = info[i].mOrientations;
+			s.speed = info[i].mSpeeds;
 
-			if (!firstTick && s.lap !== prev.lap) {
+			if (!firstTick && s.lapsCompleted !== prev.lapsCompleted && s.lapsCompleted > startPosition.lap) {
 				lapTimes[name].push(s.lastLap);
 				console.log('Player ' + info[i].mName + ' finished lap ' + s.lapsCompleted + ' in ' + s.lastLap + ' seconds.');
 			}
-			process.stdout.write('-');
 			stillRacing = true;
 		} else {
-			console.log('Player ' + info[i].mName + ' not racing. RaceState: ' + info[i].mRraceStates);
+			// console.log('Player ' + info[i].mName + ' not racing. RaceState: ' + info[i].mRaceStates);
 		}
 	}
 
 	if (stillRacing) {
-		process.stdout.write('_');
+		// process.stdout.write('.');
 		d.push(timestamp);
 		for (let j = 0; j < order.length; j++) {
-			d.push(snapshot[order[j]].distance);
+			let pData = [];
+			pData.push(snapshot[order[j]].distance);
+			pData.push(snapshot[order[j]].speed);
+			pData.push(snapshot[order[j]].worldPos);
+			pData.push(snapshot[order[j]].orientation);
+			d.push(pData);
 		}
 		if (firstTick) {
 			fileStream.write('\n\t\t' + JSON.stringify(d));
@@ -122,7 +129,6 @@ module.exports.tick = function tick(timestamp, info) {
 	} else {
 		console.log('Noone is racing anymore.');
 	}
-	process.stdout.write(':');
 	// console.log(timestamp + ': ' + JSON.stringify(d));
 };
 
