@@ -2,6 +2,7 @@ const fs = require('fs');
 const moment = require('moment');
 const settings = require('./settings.json');
 let fileStream = null;
+let filename = 'unknown_data.js';
 let index = {};
 let participants = null;
 let lapTimes = {};
@@ -15,8 +16,11 @@ let snapshot = {};
 let prevSnap = {};
 let startPosition = {
 	'lap': settings.nbrFormationLaps,
-	'lapDistance': 0
+	'lapDistance': 0,
+	'set': false
 };
+module.exports.filename = filename;
+
 const penalties = []; // {name, penalty}
 module.exports.penalties = penalties;
 
@@ -39,10 +43,11 @@ module.exports.init = function init(eventInfo, participants_) {
 	index = {};
 	firstTick = true;
 
-	let path = 'race_data/' + moment().format('YYYYMMDD') + '_' + eventInfo.mTrackLocation + '_' + eventInfo.mTrackVariation + '.json';
-	fileStream = fs.createWriteStream(path);
-	fileStream.write('{\n\t"eventInformation": ');
+	filename = 'race_data/' + moment().format('YYYYMMDD') + '_' + eventInfo.mTrackLocation + '_' + eventInfo.mTrackVariation + '.js';
+	fileStream = fs.createWriteStream(filename);
+	fileStream.write('var eventInformation= ');
 	fileStream.write(JSON.stringify(eventInfo));
+
 	let i = 0;
 
 	Object.keys(participants).forEach((name) => {
@@ -53,13 +58,17 @@ module.exports.init = function init(eventInfo, participants_) {
 		i++;
 	});
 	nbrParticipants = i;
-	fileStream.write(',\n\t"participants": ' + JSON.stringify(order))
-	fileStream.write(',\n\t"distance": [');
+	startPosition.set = false;
+	fileStream.write(';\nvar participants= ' + JSON.stringify(order));
 };
 
 module.exports.setStartPosition = function setStartPosition(lap, lapDistance) {
-	startPosition.lap = lap;
-	startPosition.lapDistance = lapDistance;
+	if (!startPosition.set) {
+		console.log('Setting start position to lap ' + lap + ' distance ' + lapDistance);
+		startPosition.lap = lap;
+		startPosition.lapDistance = lapDistance;
+		startPosition.set = true;
+	}
 }
 
 module.exports.addPenalty = function addPenalty(name, penalty) {
@@ -75,7 +84,28 @@ module.exports.tick = function tick(timestamp, info) {
 	let d = [];
 	// console.log(info.length);
 	if (firstTick) {
+		if (!startPosition.set) {
+			let maxLap = 0;
+			let maxD = 0;
+			let maxTotal = 0;
+			for (let i = 0; i < info.length; i++) {
+				let d = info[i].mCurrentLapDistance + s.lapsCompleted * trackLength;
+				if (d >= maxTotal) {
+					maxTotal = d;
+					maxLap = info[i].lapsCompleted;
+					maxD = info[i].mCurrentLapDistance;
+				}
+			}
+			console.log('Calculated start position to lap ' + maxLap + ' distance ' + maxD);
+			startPosition.lap = maxLap;
+			startPosition.lapDistance = maxD;
+			startPosition.set = true;
+		}
+
 		startTime = moment();
+		fileStream.write(';\nvar startTime= "' + startTime.format('YYYYMMDDTHHmmss') + '"') ;
+		fileStream.write(';\nvar startPosition= ' + JSON.stringify(startPosition));
+		fileStream.write(';\nvar data= [');
 	}
 	for (let i = 0; i < info.length; i++) {
 		if ((firstTick || snapshot[info[i].mName].raceState === 2) && info[i].mRacePosition !== 0) {
@@ -93,7 +123,7 @@ module.exports.tick = function tick(timestamp, info) {
 			s.speed = info[i].mSpeeds;
 			s.lapsCompleted = info[i].mLapsCompleted;
 			s.raceState = info[i].mRaceStates;
-			s.distance = Math.round(s.lapDistance + (s.lapsCompleted - startPosition.lap) * trackLength - startPosition.lapDistance);
+			s.distance = Math.round(s.lapDistance + (s.lapsCompleted - startPosition.lap) * trackLength);
 			s.timestamp = timestamp;
 			s.worldPos = info[i].mWorldPosition;
 			s.orientation = info[i].mOrientations;
@@ -101,7 +131,7 @@ module.exports.tick = function tick(timestamp, info) {
 
 			if (!firstTick && s.lapsCompleted !== prev.lapsCompleted && s.lapsCompleted > startPosition.lap) {
 				lapTimes[name].push(s.lastLap);
-				console.log('Player ' + info[i].mName + ' finished lap ' + s.lapsCompleted + ' in ' + s.lastLap + ' seconds.');
+				console.log('Player ' + name + ' finished lap ' + (s.lapsCompleted - startPosition.lap) + ' in ' + s.lastLap + ' seconds.');
 			}
 			stillRacing = true;
 		} else {
@@ -121,40 +151,43 @@ module.exports.tick = function tick(timestamp, info) {
 			d.push(pData);
 		}
 		if (firstTick) {
-			fileStream.write('\n\t\t' + JSON.stringify(d));
+			fileStream.write('\n\t' + JSON.stringify(d));
 			firstTick = false;
 		} else {
-			fileStream.write(',\n\t\t' + JSON.stringify(d));
+			fileStream.write(',\n\t' + JSON.stringify(d));
 		}
 	} else {
 		console.log('Noone is racing anymore.');
+		close();
 	}
 	// console.log(timestamp + ': ' + JSON.stringify(d));
 };
 
 function close() {
 	if (fileStream !== null) {
-		fileStream.write('\n\t]');
-		fileStream.write(',\n\t"startPosition": ');
-		fileStream.write(JSON.stringify(startPosition));
-		fileStream.write(',\n\t"startTime": ');
-		fileStream.write(JSON.stringify(startTime));
+		fileStream.write(']');
 		if (lapTimes !== null) {
-			fileStream.write(',\n\t"lapTimes": ');
+			fileStream.write(';\nvar lapTimes = ');
 			fileStream.write(JSON.stringify(lapTimes));
 		}
 		if (snapshot !== null) {
-			fileStream.write(',\n\t"results":');
+			fileStream.write(';\nvar results = ');
 			fileStream.write(JSON.stringify(snapshot));
 		}
 		if (prevSnap !== null) {
-			fileStream.write(',\n\t"last":');
+			fileStream.write(';\nvar last = ');
 			fileStream.write(JSON.stringify(prevSnap));
 		}
-		fileStream.write(',\n\t"penalties":');
+		fileStream.write(';\nvar penalties = ');
 		fileStream.write(JSON.stringify(penalties));
-		fileStream.end('\n}');
+		fileStream.write(';\nvar dataLoaded = true');
+		fileStream.end(';');
 		fileStream = null;
 	}
+	return filename;
 }
 module.exports.close = close;
+
+module.exports.getResults = function getResults() {
+	return snapshot;
+};

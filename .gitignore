@@ -1,13 +1,19 @@
+*.png
+test.html
+race_view/legacy/
+
 #workspaces
 RaceBot.sublime-project
 RaceBot.sublime-workspace
 authorization.json
 crest/
+plot/
 
 # Data backup
 backup/
 race_data/*
 race_data.json
+html/
 
 # Generated audio
 sound/*.wav

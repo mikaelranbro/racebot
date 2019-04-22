@@ -19,7 +19,7 @@ function sortDrivers() {
 	let newDrivers = {};
 	for (i = 1; i <= nbrDrivers; i++) {
 		Object.keys(drivers).forEach(function(key) {
-			if (drivers[key].position == i) {
+			if (drivers[key].position === i) {
 				newDrivers[key] = drivers[key];
 			}
 		});
@@ -28,6 +28,23 @@ function sortDrivers() {
 }
 sortDrivers();
 module.exports.drivers = drivers;
+
+function sortDriversOnPoints() {
+	let unsorted = [];
+	Object.keys(drivers).forEach(function(key) {
+		unsorted.push(drivers[key]);
+	});
+	let sorted = unsorted.sort((a,b) => {
+		return b.points - a.points;
+	});
+	drivers = {};
+	let i = 1;
+	sorted.forEach(driver => {
+		driver.position = i;
+		i++;
+		drivers[driver.name] = driver;
+	});
+}
 
 function parseSchedule() {
 	let nextMoment = moment("20401010", "YYYYMMDD");
@@ -96,6 +113,7 @@ module.exports.getDriver = function(name) {
 			}
 		});
 	}
+	return null;
 }
 
 module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants = null) {
@@ -143,6 +161,16 @@ module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants 
 	return starts;
 };
 
+function getNextEvent() {
+	Object.keys(schedule).forEach(key => {
+		if (schedule[key].state === 'upcoming') {
+			return schedule[key];
+		}
+	});
+	return null;
+}
+module.exports.getNextEvent = getNextEvent;
+
 module.exports.register = function register(user, steamName, sounds) {
 	console.log('Registring user ' + user.username + ' as ' + steamName + ', ' + sounds);
 	var driver;
@@ -171,11 +199,67 @@ module.exports.register = function register(user, steamName, sounds) {
 	this.save();
 };
 
+module.exports.updateStandings = function updateStandings(results, eventInformation) {
+	if (settings.practiceMode === true) {
+		console.log('Discarding standings because of practice mode.');
+		return;
+	}
+	let scheduled = getNextEvent();
+	if (schedule === null) {
+		console.log('Discarding standings because there are no more events scheduled.');
+		return;
+	}
+	dateMoment = moment(scheduled.date);
+	let diff = moment().diff(dateMoment);
+	if (diff > (3 * 60 * 60 * 1000)) {
+		let duration = moment.duration(diff);
+		console.log('Discarding standings because the scheduled start time (' + scheduled.date + ') is more than 3 hours off (' + duration.humanize(true) + ').');
+		return;
+	}
+	if (eventInformation.mLapsInEvent < 15) {
+		console.log('Discarding standings because of insufficient number of laps for an official event (' + eventInformation.mLapsInEvent + ').');
+		return;
+	}
+
+	let nbrDrivers = Object.keys(drivers).length;
+	Object.keys(results).forEach(name => {
+		let driver = getDriver(results[name]);
+		if (driver !== null) {
+			let result = results[name];
+			if (result.raceState === 3) {
+				let points = 0;
+				if (results.position === 1) {
+					points = nbrDrivers + 1;
+					console.log('Participant ' + name + ' won the race and gains ' + point + ' points.');
+				} else {
+					points = nbrDrivers + 1 - result.position;
+					console.log('Participant ' + name + ' finished on position ' + result.position + ' and gains ' + points + ' points.');
+				}
+				driver.points += points;
+			} else {
+				console.log('Participant ' + name + ' did not finish.');
+			}
+		} else {
+			console.log('Participant ' + name + ' not found among registered drivers.');
+		}
+	});
+	sortDriversOnPoints();
+	this.save();
+	scheduled.state = 'finished';
+	fs.writeFile('schedule.json', JSON.stringify(schedule, null, '\t'), 'utf8', (err) => {
+		if (err) throw err;
+		console.log('Saved "schedule.json"');
+	});
+};
+
+
 module.exports.save = function save() {
 	fs.writeFile('drivers.json', JSON.stringify(drivers, null, '\t'), 'utf8', (err) => {
 		if (err) throw err;
 		console.log('Saved "drivers.json"');
 	});
 }
+
+
 
 //console.log(module.exports.getSchedule());

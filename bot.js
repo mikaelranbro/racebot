@@ -13,7 +13,6 @@ const prefix = '!';
 var textChannel = null;
 var voiceChannel = null;
 var voiceConnection = null;
-
 var hasAnnouncedSelf = false;
 var ready = false;
 
@@ -32,6 +31,7 @@ const helpString = '\
 
 let shuttingDown = false;
 let nbrDriversInChannel = 0;
+let loopRunning = false;
 async function discordLoop() {
 	while (!shuttingDown) {
 		if (voiceChannel !== null) {
@@ -52,13 +52,14 @@ async function discordLoop() {
 		}
 		await sleep(1000);
 	}
+	loopRunning = false;
 }
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-client.once('ready', () => {
+client.on('ready', () => {
 	client.user.setActivity('Project Cars 2', {
 		"type": "WATCHING"
 	});
@@ -83,7 +84,10 @@ client.once('ready', () => {
 		race.init(voice, textChannel, season);
 		console.log('Ready.');
 	}
-	discordLoop();
+	if (!loopRunning) {
+		loopRunning = true;
+		discordLoop();
+	}
 });
 
 function joinVoiceChannel() {
@@ -97,6 +101,7 @@ function joinVoiceChannel() {
 				voiceConnection = connection;
 				voiceConnection.on('error', error => {
 					console.log('********** ERROR in voiceConnection ************\n' + error);
+					voice.setConnection(null);
 					voiceConnection = null;
 					reJoinVoiceChannel();
 				});
@@ -137,8 +142,33 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 
 client.on('error', error => {
 	console.log('******* ERROR in client *******\n' + error);
-	client.login();
+	waitAndLogin(5000);
 });
+
+function login() {
+	client.login(auth.token)
+	.then(() => {
+		console.log('Reconnected');
+	})
+	.catch((error) => {
+		reset();
+		console.log(error);
+		waitAndLogin(1000);
+	});
+}
+
+function reset() {
+	textChannel = null;
+ 	voiceChannel = null;
+	voiceConnection = null;
+	voice.setConnection(null);
+	ready = false;
+}
+
+async function waitAndLogin(waitTime) {
+	await sleep(waitTime);
+	login();
+}
 
 
 client.on('message', message => {
@@ -253,6 +283,11 @@ if (settings.offline) {
 			const tests = require('./test.js');
 			tests.runOffline(this);
 		}
+	})
+	.catch((error) => {
+		reset();
+		console.log(error);
+		waitAndLogin(5000);
 	});
 }
 

@@ -2,6 +2,7 @@ const moment = require('moment');
 const axios = require('axios');
 const settings = require('./settings.json');
 const raceData = require('./race_data.js');
+const raceViewCreator = require('./race_view_creator.js');
 const fs = require('fs');
 var voice = null;
 var season = null;
@@ -201,7 +202,13 @@ module.exports.start = async function start() {
 	}
 	racePromise = raceLoop();
 	console.log('>----------------- Race initiated -----------------<');
-	voice.speak('Race start initiated.')
+	
+  if (settings.practiceMode) {
+  	voice.speak('Race start initiated in practice mode.');
+  } else {
+  	voice.speak('Race start initiated.')	
+  }
+
 };
 
 module.exports.abort = async function abort() {
@@ -215,11 +222,14 @@ module.exports.abort = async function abort() {
 		raceData.close();
 		console.log('>------------------ Race aborted ------------------<');
 		voice.speak('Race aborted.');
+		racePromise = null;
 	}
 };
 
 module.exports.finish = async function finish() {
-	voice.speak('Races cannot be finished.');
+	abort();
+  finishRace();
+  season.updateStandings(raceData.getResults(), eventInformation);
 };
 
 function speakAnnouncements() {
@@ -425,11 +435,12 @@ async function raceLoop() {
 			case RaceState.STARTING.WAITING_FOR_DELAY:
 				metricsInterval = 1000;
 				let driver = participants[starts[0].drivers[0].steamName];
-				raceData.setStartPosition(driver.lapsCompleted, driver.lapDistance);
+				
 				if (elapsed >= ((startDelay - settings.startSilenceBuffer) * 1000)) {
+					raceData.setStartPosition(driver.lapsCompleted + 1, driver.lapDistance);
 					raceStartMoment = null;
 					stateTime = changeState(RaceState.STARTING.EXECUTING, stateTime);
-					voice.speak('Attention!', voice.Priority.CRITICAL, 3);
+					voice.speak('Attention!..', voice.Priority.CRITICAL, 1);
 				} else {
 					speakAnnouncements();
 				}
@@ -464,14 +475,14 @@ async function raceLoop() {
 				let stillRacing = false;
 				Object.keys(participants).forEach((steamName) => {
 					let p = participants[steamName];
-					if (p.raceState === PC.RaceState.RACESTATE_RACING) {
+					if (p.raceState === PC.RaceState.RACESTATE_RACING && p.position !== 0) {
 						stillRacing = true;
 					} else if (p.hasFinished === false) {
 						p.hasFinished = true;
 						voice.speak(p.name + ' has finished ' + voice.getPosition(p.position, nbrParticipants), voice.Priority.EVENTUAL);
 					}
 				});
-				if (stillRacing) {
+				if (stillRacing && currentPCState.raceState === PC.RaceState.RACESTATE_RACING) {
 					speakAnnouncements();
 				} else {
 					console.log('Race finished. Game RaceState: ' + currentPCState.raceState);
@@ -482,7 +493,7 @@ async function raceLoop() {
 			case RaceState.FINISHING.UPDATING_STANDINGS:
 				raceOngoing = false;
 				voice.speak('Race finished.');
-				raceData.close();
+				finishRace();
 				stateTime = changeState(RaceState.FINISHING.DONE, stateTime);
 				break;
 			case RaceState.FINISHING.DONE:
@@ -495,9 +506,9 @@ async function raceLoop() {
 	}
 	raceOngoing = false;
 	if (RaceState !== RaceState.FINISHING.DONE) {
+		raceData.close();
 		changeState(RaceState.ABORTED, stateTime);
 	}
-	racePromise = null;
 }
 
 
@@ -558,7 +569,7 @@ function explainProcedure(step) {
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			break;
 		case 2:
-			voice.speak('Zadj-eve, I am sure you will do better this time.', voice.Priority.EVENTUAL);
+			voice.speak('Beware of garves.', voice.Priority.EVENTUAL);
 			//voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			//voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
@@ -599,6 +610,16 @@ function checkOrder() {
 			text += ', ' + driver.sounds;
 		});
 		voice.speak(text);
+	}
+}
+
+function finishRace() {
+	let dataPath = raceData.close();
+	if (typeof dataPath !== 'undefined' && dataPath !== '' && 'unknown_data.js' && fs.existsSync(dataPath)) {
+		if (!fs.existsSync('html')) {
+			fs.mkdirSync('html');
+		}
+		raceViewCreator.createRaceView(dataPath, 'html/' + moment().format('YYYYMMDD') + '_' + eventInformation.mTrackLocation + '_' + eventInformation.mTrackVariation + '.html');
 	}
 }
 
