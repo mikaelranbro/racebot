@@ -57,9 +57,9 @@ function parseSchedule() {
 			nextMoment = race.moment;
 		}
 	});
+	console.log(JSON.stringify(nextRace));
 }
 parseSchedule();
-console.log(nextRace);
 module.exports.schedule = schedule;
 module.exports.nextRace = nextRace;
 
@@ -102,23 +102,25 @@ module.exports.getSchedule = function getSchedule() {
 	return output;
 };
 
-module.exports.getDriver = function(name) {
+function getDriver(name) {
+	let driver = null;
 	if (drivers.hasOwnProperty(name)) {
 		return drivers[name];
 	} else {
 		Object.keys(drivers).forEach((key) => {
-			if (drivers[key].steamName.toLowerCase() === name.toLowerCase() ||
-				key.toLowerCase() === name.toLowerCase()) {
-				return drivers[key];
+			if (driver === null && (drivers[key].steamName.toLowerCase() == name.toLowerCase()) ||
+				(key.toLowerCase() == name.toLowerCase())) {
+				driver = drivers[key];
 			}
 		});
 	}
-	return null;
+	return driver;
 }
+module.exports.getDriver = getDriver;
 
 module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants = null) {
 	var keys = Object.keys(drivers);
-	// console.log('-------------------\nKeys:\n' + keys);
+	// console.log('-------------------\nKeys:\n' + keys);	
 	//var offset = drivers[keys[nbrDrivers - 1]].points;
 	var offset = -1;
 	var starts = [];
@@ -162,12 +164,15 @@ module.exports.getStartOrder = function getStartOrder(minDiff = 3, participants 
 };
 
 function getNextEvent() {
+	let nextMoment = moment("20401010", "YYYYMMDD");
+	let nRace = null;
 	Object.keys(schedule).forEach(key => {
-		if (schedule[key].state === 'upcoming') {
-			return schedule[key];
+		if ((schedule[key].state === 'upcoming') && schedule[key].moment.isBefore(nextMoment)) {
+			nRace = schedule[key];
+			nextMoment = schedule[key].moment;
 		}
 	});
-	return null;
+	return nRace;
 }
 module.exports.getNextEvent = getNextEvent;
 
@@ -200,42 +205,46 @@ module.exports.register = function register(user, steamName, sounds) {
 };
 
 module.exports.updateStandings = function updateStandings(results, eventInformation) {
+	let commit = true;
 	if (settings.practiceMode === true) {
 		console.log('Discarding standings because of practice mode.');
-		return;
+		commit = false;
 	}
 	let scheduled = getNextEvent();
-	if (schedule === null) {
+	if (scheduled === null) {
 		console.log('Discarding standings because there are no more events scheduled.');
-		return;
+		commit = false;
 	}
 	dateMoment = moment(scheduled.date);
-	let diff = moment().diff(dateMoment);
-	if (diff > (3 * 60 * 60 * 1000)) {
+	let diff = dateMoment.diff(moment());
+	if (diff > (3 * 60 * 60 * 1000) || diff < (-3*60*60*1000)) {
 		let duration = moment.duration(diff);
 		console.log('Discarding standings because the scheduled start time (' + scheduled.date + ') is more than 3 hours off (' + duration.humanize(true) + ').');
-		return;
+		commit = false;
 	}
 	if (eventInformation.mLapsInEvent < 15) {
 		console.log('Discarding standings because of insufficient number of laps for an official event (' + eventInformation.mLapsInEvent + ').');
-		return;
+		commit = false;
 	}
 
 	let nbrDrivers = Object.keys(drivers).length;
 	Object.keys(results).forEach(name => {
-		let driver = getDriver(results[name]);
+		//console.log('Calculating results for ' + name);
+		let driver = getDriver(name);
 		if (driver !== null) {
 			let result = results[name];
 			if (result.raceState === 3) {
 				let points = 0;
-				if (results.position === 1) {
+				if (result.position === 1) {
 					points = nbrDrivers + 1;
-					console.log('Participant ' + name + ' won the race and gains ' + point + ' points.');
+					console.log('Participant ' + name + ' won the race and gains ' + points + ' points.');
 				} else {
 					points = nbrDrivers + 1 - result.position;
 					console.log('Participant ' + name + ' finished on position ' + result.position + ' and gains ' + points + ' points.');
 				}
-				driver.points += points;
+				if (commit) {
+					driver.points += points;
+				}
 			} else {
 				console.log('Participant ' + name + ' did not finish.');
 			}
@@ -243,13 +252,15 @@ module.exports.updateStandings = function updateStandings(results, eventInformat
 			console.log('Participant ' + name + ' not found among registered drivers.');
 		}
 	});
-	sortDriversOnPoints();
-	this.save();
-	scheduled.state = 'finished';
-	fs.writeFile('schedule.json', JSON.stringify(schedule, null, '\t'), 'utf8', (err) => {
-		if (err) throw err;
-		console.log('Saved "schedule.json"');
-	});
+	if (commit) {
+		sortDriversOnPoints();
+		this.save();
+		scheduled.state = 'finished';
+		fs.writeFile('schedule.json', JSON.stringify(schedule, null, '\t'), 'utf8', (err) => {
+			if (err) throw err;
+			console.log('Saved "schedule.json"');
+		});
+	}
 };
 
 

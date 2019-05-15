@@ -21,13 +21,19 @@ const helpString = '\
 \n !status - display championship standings etc.\
 \n !register <steam name> <pronounciation> - register for the championship and tell the bot how to pronounce your name\
 \n !schedule - display racing schedule\
-\n !prepare - prepare the next race\
-\n !start <delay> - start/restart prepared race in <delay> seconds\
-\n !abort - abort ongoing race (it will still be prepared)\
+\n !prepare - display start order of the next race\
+\n !start <delay> - start/restart race in <delay> seconds\
+\n !abort - abort ongoing race\
 \n !finish -  finish ongoing race and update standings with results\
 \n !mute - silence the bot\
 \n !unmute - unsilence the bot\
 \n !honk - wake people up';
+
+let oldLog = console.log.bind(console);
+console.log = function() {
+	oldLog.apply(console, ['[' + moment().format('HH:mm') + '] '].concat(Object.values(arguments)));
+};
+
 
 let shuttingDown = false;
 let nbrDriversInChannel = 0;
@@ -60,17 +66,19 @@ function sleep(ms) {
 }
 
 client.on('ready', () => {
+	console.log('Discord ready');
 	client.user.setActivity('Project Cars 2', {
 		"type": "WATCHING"
 	});
 	client.guilds.forEach((guild) => {
 		console.log(guild.name + ': ');
 		guild.channels.forEach((channel) => {
-			console.log('...' + channel.name);
+			// console.log('...' + channel.name);
 			if (channel.name === "racecontrol") {
 				textChannel = channel;
-				console.log("Found channel " + channel.name);
+				console.log("...Found channel " + channel.name);
 			} else if (channel.name === "pCars") {
+				console.log("...Found channel " + channel.name);
 				voiceChannel = channel;
 			}
 		});
@@ -277,11 +285,15 @@ if (settings.offline) {
 	race.init(voice, textChannel, season);
 	const tests = require('./test.js');
 	tests.runOffline(this);
+	if (settings.runTest) {
+		tests.runTests(this);
+	}
 } else {
+	console.log('Logging in to Discord...');
 	client.login(auth.token).then(() => {
 		if (settings.runTest) {
 			const tests = require('./test.js');
-			tests.runOffline(this);
+			tests.runTests(this);
 		}
 	})
 	.catch((error) => {
@@ -305,10 +317,11 @@ if (process.platform === "win32") {
 process.on("SIGINT", function() {
 	//graceful shutdown
 	shuttingDown = true;
-	if (!settings.offline) {
+	if (!settings.offline && voiceConnection !== null) {
 		voiceConnection.disconnect();
 	}
 	race.abort();
 	client.destroy();
 	process.exit();
 });
+

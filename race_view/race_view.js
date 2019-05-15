@@ -53,7 +53,7 @@ let lastTime = new Date().getTime();
 let time = lastTime;
 let raceTime = 0;
 let lastRaceTime = raceTime;
-let hue = [0, 40, 70, 120, 170, 210, 270, 300, 340];
+let defaultHue = [0, 40, 70, 120, 170, 210, 270, 300, 340];
 let meters = [];
 let selectedLap = 0;
 let selectedMeter = -1;
@@ -144,7 +144,11 @@ function setBounds() {
 }
 
 function getColor(j, s = 100, l = 40, a = 1) {
-	return 'hsla(' + hue[j] + ', ' + s +'%, ' + l +'%, ' + a +')';
+	let h = defaultHue[j];
+	if (typeof hues !== 'undefined') {
+		h = hues[j];
+	}
+	return 'hsla(' + h + ', ' + s +'%, ' + l +'%, ' + a +')';
 }
 
 let previousMode = mode;
@@ -232,17 +236,11 @@ function loop() {
 	  		info['']
 	  		if (graphMode !== GRAPH_MODE.LAP_TIMES) {
 	  	  ctx.save();
-	  	  if (rotation !== 0) {
-  	  		ctx.translate(128 + bounds.width / 2, bounds.height / 4);
-  	  	} else {
-  	  		ctx.translate(0, bounds.height / 3);
-  	  	}
-	  	  ctx.scale(0.25, 0.25);
-	  	  ctx.globalAlpha = 0.25;
+	  	  ctx.globalAlpha = 0.15;
 	  	  drawTrack(ctx, true);
-	  	  ctx.globalAlpha = 0.8;
+	  	  ctx.globalAlpha = 0.25;
 	  	  if (selectedMeter > -1 && selectedMeter < nbrMeters) {
-	  	  	drawMeter(ctx, selectedMeter);
+	  	  	drawMeter(ctx, selectedMeter, 'black');
 	  	  }
 	  	  if (hooverMeter > -1 && hooverMeter < nbrMeters) {
 	  	  	drawMeter(ctx, hooverMeter, rulerColor);
@@ -738,19 +736,19 @@ function drawLapTimesGraph(ctx) {
 			}
 		}
 	}
-	let yScale = (ctx.height - ctx.bottomMargin - ctx.topMargin) / (max - min);
+	let yScale = (ctx.height / 2 - ctx.bottomMargin - ctx.topMargin) / (max - min);
 	let avg = (max + min) / 2;
 	// console.log('Average: ' + Math.round(avg) / 1000 + ' s');
 	let y0 = (ctx.height - ctx.bottomMargin + ctx.topMargin) / 2;
 
 	let aLap = Math.round((mouse.x - ctx.leftMargin) / step) + 1;
 	let spread = getLapTimesSpread(aLap);
-	console.log('Lap: ' + aLap + ' max: ' + spread.max + ' min: ' + spread.min + '  block height: ' + (spread.max - spread.min) * yScale);
+	// console.log('Lap: ' + aLap + ' max: ' + spread.max + ' min: ' + spread.min + '  block height: ' + (spread.max - spread.min) * yScale);
 	if (mouse.x > ctx.leftMargin && mouse.x < ctx.width - rightMargin && mouse.y > ctx.topMargin && mouse.y < ctx.height - ctx.bottomMargin  &&
 		mouse.y > y0 + (spread.min - avg) * yScale - 64 && mouse.y < y0 + (spread.max - avg) * yScale + 64) {
 		ctx.fillStyle = hooverColor;
 		hooverLap = aLap;
-		console.log('Lap: ' + aLap + ' max: ' + spread.max + ' min: ' + spread.min + '  block height: ' + (spread.max - spread.min) * yScale);
+		// console.log('Lap: ' + aLap + ' max: ' + spread.max + ' min: ' + spread.min + '  block height: ' + (spread.max - spread.min) * yScale);
 		ctx.fillRect(ctx.leftMargin + step * (hooverLap -1) - step/4, y0 + (spread.min - avg) * yScale - 12, step/2, (spread.max - spread.min) * yScale + 24);
 		if (mouse.button === 0) {
 			selectedLap = hooverLap;
@@ -1230,9 +1228,13 @@ function createMeters() {
 					filteredSpeeds.push(speeds[l]);
 				}
 			}
-			m.averageSpeeds[j] = filteredSpeeds.reduce((total, currentValue) => {
-				return total + currentValue;
-			}) / filteredSpeeds.length;
+			if (filteredSpeeds.length > 0) {
+				m.averageSpeeds[j] = filteredSpeeds.reduce((total, currentValue) => {
+					return total + currentValue;
+				}) / filteredSpeeds.length;
+			}	else {
+				m.averageSpeeds[j] = 0;
+			}
 			m.averageSpeed += m.averageSpeeds[j] / participants.length;
 		}
 	}

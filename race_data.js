@@ -55,11 +55,17 @@ module.exports.init = function init(eventInfo, participants_) {
 		index[participants[name].steamName] = i;
 		order.push(participants[name].steamName);
 		lapTimes[name] = [];
+		console.log(name + ' driving ' + participants[name].car);
 		i++;
 	});
 	nbrParticipants = i;
 	startPosition.set = false;
-	fileStream.write(';\nvar participants= ' + JSON.stringify(order));
+	fileStream.write(';\nvar participants = ' + JSON.stringify(order));
+	let hues = [];
+	order.forEach((p, i) =>  {
+		hues.push(participants[p].hue);
+	});
+	fileStream.write(';\nvar hues = ' + JSON.stringify(hues));
 };
 
 module.exports.setStartPosition = function setStartPosition(lap, lapDistance) {
@@ -82,22 +88,23 @@ module.exports.tick = function tick(timestamp, info) {
 	if (fileStream === null) return;
 	let stillRacing = false;
 	let d = [];
-	// console.log(info.length);
 	if (firstTick) {
 		if (!startPosition.set) {
+			console.log('Setting start position');
 			let maxLap = 0;
 			let maxD = 0;
 			let maxTotal = 0;
 			for (let i = 0; i < info.length; i++) {
-				let d = info[i].mCurrentLapDistance + s.lapsCompleted * trackLength;
+				let d = info[i].mCurrentLapDistance + info[i].mLapsCompleted * trackLength;
+				console.log('...' + info[i].mName + ': ' + d);
 				if (d >= maxTotal) {
 					maxTotal = d;
-					maxLap = info[i].lapsCompleted;
+					maxLap = Math.round(info[i].mLapsCompleted);
 					maxD = info[i].mCurrentLapDistance;
 				}
 			}
-			console.log('Calculated start position to lap ' + maxLap + ' distance ' + maxD);
-			startPosition.lap = maxLap;
+			console.log('Calculated start position to lap ' + (maxLap + 1) + ' distance ' + maxD);
+			startPosition.lap = maxLap + 1;
 			startPosition.lapDistance = maxD;
 			startPosition.set = true;
 		}

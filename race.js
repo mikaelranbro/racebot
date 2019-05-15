@@ -150,6 +150,7 @@ function prepareParticipants(data, minDiff) {
 			console.log('Unknown participant "' + data.mParticipantInfo[i].mName + '"');
 			name = data.mParticipantInfo[i].mName;
 		}
+		let driver = season.getDriver(name);
 		var steam = data.mParticipantInfo[i].mName;
 		participants[steam] = {};
 		participants[steam].name = name;
@@ -160,6 +161,11 @@ function prepareParticipants(data, minDiff) {
 		participants[steam].position = 0;
 		participants[steam].lapDistance = 0;
 		participants[steam].hasFinished = false;
+		if (driver !== null) {
+			participants[steam].hue = driver.hue;
+		} else {
+			participants[steam].hue = 21;
+		}
 	}
 	nbrParticipants = data.mNumParticipants;
 
@@ -227,7 +233,7 @@ module.exports.abort = async function abort() {
 };
 
 module.exports.finish = async function finish() {
-	abort();
+	this.abort();
   finishRace();
   season.updateStandings(raceData.getResults(), eventInformation);
 };
@@ -355,7 +361,7 @@ async function raceLoop() {
 			case RaceState.PREPARING.WAITING_FOR_RACE_START:
 				// console.log('practice: ' + settings.practiceMode + ', currentPCState: ' + currentPCState);
 				collectMetrics = true;
-				if ((settings.practiceMode && currentPCState.sessionState === PC.SessionState.SESSION_PRACTICE ||
+				if ((settings.practiceMode && currentPCState.sessionState > 0 ||
 						currentPCState.sessionState === PC.SessionState.SESSION_RACE) &&
 					currentPCState.raceState === PC.RaceState.RACESTATE_NOT_STARTED &&
 					!welcomeDone) {
@@ -365,13 +371,13 @@ async function raceLoop() {
 					welcomeDone = true;
 				}
 
-				if ((settings.practiceMode && currentPCState.sessionState === PC.SessionState.SESSION_PRACTICE ||
+				if ((settings.practiceMode && currentPCState.sessionState > 0 ||
 						currentPCState.sessionState === PC.SessionState.SESSION_RACE) &&
 					currentPCState.raceState === PC.RaceState.RACESTATE_RACING) {
 					if (!welcomeDone) {
 						var eventResponse = await getEventInformation();
 						eventInformation = eventResponse.data.eventInformation;
-						voice.speak('Welcome to ' + eventInformation.mTrackLocation + ' ' + eventInformation.mTranslatedTrackVariation, voice.Priority.NONSENSE);
+						voice.speak('Welcome to ' + eventInformation.mTranslatedTrackLocation + ' ' + eventInformation.mTranslatedTrackVariation, voice.Priority.NONSENSE);
 						welcomeDone = true;
 					}
 					stateTime = changeState(RaceState.PREPARING.CALCULATING, stateTime);
@@ -387,14 +393,22 @@ async function raceLoop() {
 				}
 				break;
 			case RaceState.PREPARING.CALCULATING:
-				var response = await getParticipants();
+				let response = await getParticipants();
 				prepareParticipants(response.data.participants, settings.minStartDiff);
 				raceData.init(eventInformation, participants);
-				stateTime = changeState(RaceState.PREPARING.DONE, stateTime);
+				if (settings.startProcedure) {
+					stateTime = changeState(RaceState.PREPARING.DONE, stateTime);
+				} else {
+					stateTime = changeState(RaceState.RUNNING.SILENT, stateTime);
+					raceOngoing = true;
+					raceStartMoment = moment();
+					metricsInterval = settings.metricsInterval;
+					collectMetrics = true;
+				}
 				break;
 			case RaceState.PREPARING.DONE:
 				stateTime = changeState(RaceState.STARTING.WAITING_FOR_POSITIONING, stateTime);
-				var text = 'Line up in the following order..';
+				let text = 'Line up in the following order..';
 				startOrder.forEach((driver) => {
 					text += ', ' + driver.sounds;
 				});
@@ -402,8 +416,8 @@ async function raceLoop() {
 				voice.speak(text);
 				break;
 			case RaceState.STARTING.WAITING_FOR_POSITIONING:
-				var totalSpeed = 0;
-				var stationary = true;
+				let totalSpeed = 0;
+				let stationary = true;
 				metricsInterval = 1000;
 				collectMetrics = true;
 				Object.keys(participants).forEach((name) => {
@@ -418,7 +432,7 @@ async function raceLoop() {
 					stateTime = changeState(RaceState.STARTING.WAITING_FOR_DELAY, stateTime);
 					voice.speak('Everyone in position. Get ready.', voice.Priority.CRITICAL);
 				} else {
-					var now = moment();
+					let now = moment();
 					if (now.diff(reminderMoment) > 30000) {
 						reminderMoment = now;
 						explain = true;
@@ -459,16 +473,18 @@ async function raceLoop() {
 				}
 				break;
 			case RaceState.RUNNING.SILENT:
+				collectMetrics = true;
 				metricsInterval = settings.metricsInterval;
 				if (elapsed > 10000) {
 					stateTime = changeState(RaceState.RUNNING.LOUD, stateTime);
 				}
 				break;
 			case RaceState.RUNNING.LOUD:
+				collectMetrics = true;
 				metricsInterval = settings.metricsInterval;
 				if (!hasDeclaredFalseStarts) {
 					hasDeclaredFalseStarts = true;
-					if (raceData.penalties.length === 0) {
+					if (raceData.penalties.length === 0 && settings.startProcedure === true) {
 						voice.speak('Everyone started in good order. Well done!');
 					}
 				}
@@ -479,10 +495,11 @@ async function raceLoop() {
 						stillRacing = true;
 					} else if (p.hasFinished === false) {
 						p.hasFinished = true;
+						console.log(p.name + ' finished.  raceState: ' + p.raceState + '  position: ' + p.position);
 						voice.speak(p.name + ' has finished ' + voice.getPosition(p.position, nbrParticipants), voice.Priority.EVENTUAL);
 					}
 				});
-				if (stillRacing && currentPCState.raceState === PC.RaceState.RACESTATE_RACING) {
+				if (stillRacing && currentPCState.raceState > 0) {
 					speakAnnouncements();
 				} else {
 					console.log('Race finished. Game RaceState: ' + currentPCState.raceState);
@@ -561,7 +578,8 @@ function executeStart(start, leftToStart) {
 function explainProcedure(step) {
 	switch (step) {
 		case 0:
-			voice.speak('You should know the start procedure by now... Name, beeps, drive.', voice.Priority.EVENTUAL);
+			voice.speak('Start procedure is... Name, beeps, drive.', voice.Priority.EVENTUAL);
+			// voice.speak('You should know the start procedure by now... Name, beeps, drive.', voice.Priority.EVENTUAL);
 			// voice.speak('I will explain the start procedure... When your name is called, you are next and will start within 3 seconds.', voice.Priority.INFO);
 			break;
 		case 1:
@@ -569,7 +587,7 @@ function explainProcedure(step) {
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			break;
 		case 2:
-			voice.speak('Beware of garves.', voice.Priority.EVENTUAL);
+			voice.speak('Consider going faster.', voice.Priority.EVENTUAL);
 			//voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			//voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
@@ -578,13 +596,15 @@ function explainProcedure(step) {
 			//voice.speak('There can be multiple names on the same start time. They all start on the same beeps.', voice.Priority.EVENTUAL);
 			break;
 		case 4:
-			voice.speak('This is taking forever.', voice.Priority.EVENTUAL);
+			voice.speak('I am bored.', voice.Priority.EVENTUAL);
+			//voice.speak('This is taking forever.', voice.Priority.EVENTUAL);
 			//voice.speak('Example.', voice.Priority.EVENTUAL);
 			//voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
 			//voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, 4000);
 			break;
 		case 5:
-			voice.speak('I will be right back.', voice.Priority.EVENTUAL);
+			voice.speak('Oops.', voice.Priority.EVENTUAL);
+			// voice.speak('I will be right back.', voice.Priority.EVENTUAL);
 			break;
 		case 7:
 			voice.speak('Maybe... Maybe... Yes...', voice.Priority.EVENTUAL);

@@ -30,31 +30,31 @@
 		"state": "finished"
 	},
 	"6": {
-		"date": "20190423T2030",
+		"date": "20190423T2100",
 		"track": "Algarve",
 		"laps": 25,
-		"state": "upcoming"
+		"state": "finished"
 	},
 	"7": {
-		"date": "20190430T2030",
+		"date": "20190507T2030",
 		"track": "Brands Hatch GP",
 		"laps": 25,
-		"state": "upcoming"
+		"state": "finished"
 	},
 	"8": {
-		"date": "20190507T2030",
+		"date": "20190514T2030",
 		"track": "Red Bull Ring GP",
 		"laps": 25,
-		"state": "upcoming"
+		"state": "finished"
 	},
 	"9": {
-		"date": "20190514T2030",
+		"date": "20190521T2030",
 		"track": "Dubai Autodrome GP",
 		"laps": 25,
 		"state": "upcoming"
 	},
 	"10": {
-		"date": "20190521T2030",
+		"date": "20190528T2030",
 		"track": "SPA-Francorchamps",
 		"laps": 25,
 		"state": "upcoming"
