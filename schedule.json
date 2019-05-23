@@ -3,60 +3,80 @@
 		"date": "20190319T2030",
 		"track": "Sonoma Raceway GP",
 		"laps": 27,
-		"state": "finished"
+		"state": "finished",
+		"moment": "2019-03-19T19:30:00.000Z",
+		"id": "1"
 	},
 	"2": {
 		"date": "20190326T2030",
 		"track": "Nurburgring GP",
 		"laps": 25,
-		"state": "finished"
+		"state": "finished",
+		"moment": "2019-03-26T19:30:00.000Z",
+		"id": "2"
 	},
 	"3": {
 		"date": "20190402T2030",
 		"track": "Sakitto GP",
 		"laps": 30,
-		"state": "finished"
+		"state": "finished",
+		"moment": "2019-04-02T18:30:00.000Z",
+		"id": "3"
 	},
 	"4": {
 		"date": "20190409T2030",
 		"track": "Donington Park GP",
 		"laps": 30,
-		"state": "finished"
+		"state": "finished",
+		"moment": "2019-04-09T18:30:00.000Z",
+		"id": "4"
 	},
 	"5": {
 		"date": "20190416T2030",
 		"track": "Watkins Glen GP",
 		"laps": 26,
-		"state": "finished"
+		"state": "finished",
+		"moment": "2019-04-16T18:30:00.000Z",
+		"id": "5"
 	},
 	"6": {
 		"date": "20190423T2100",
 		"track": "Algarve",
 		"laps": 25,
-		"state": "finished"
+		"state": "finished",
+		"moment": "2019-04-23T19:00:00.000Z",
+		"id": "6"
 	},
 	"7": {
 		"date": "20190507T2030",
 		"track": "Brands Hatch GP",
 		"laps": 25,
-		"state": "finished"
+		"state": "finished",
+		"moment": "2019-05-07T18:30:00.000Z",
+		"id": "7"
 	},
 	"8": {
 		"date": "20190514T2030",
 		"track": "Red Bull Ring GP",
 		"laps": 25,
-		"state": "finished"
+		"state": "finished",
+		"moment": "2019-05-14T18:30:00.000Z",
+		"id": "8"
 	},
 	"9": {
 		"date": "20190521T2030",
 		"track": "Dubai Autodrome GP",
 		"laps": 25,
-		"state": "upcoming"
+		"state": "finished",
+		"moment": "2019-05-21T18:30:00.000Z",
+		"id": "9"
 	},
 	"10": {
 		"date": "20190528T2030",
 		"track": "SPA-Francorchamps",
 		"laps": 25,
-		"state": "upcoming"
+		"state": "upcoming",
+		"moment": "2019-05-28T18:30:00.000Z",
+		"id": "10"
 	}
 }

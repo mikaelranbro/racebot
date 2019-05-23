@@ -30,6 +30,21 @@ let bounds = {
 }
 let rotation = 0;
 
+let collisions = [];
+/* collision = {
+	"time": 0,
+	"gravity": 1,
+	"involved": 2
+};
+*/
+let overtakes = [];
+/* overtake = { 
+	"time": 0,
+	"overtaker": 0,
+	"overtaken": 1
+};
+*/
+
 window.requestAnimFrame = (function(callback) {
 	return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
 		function(callback) {
@@ -97,6 +112,7 @@ function initiate() {
 	}
 	setBounds();
 	createMeters();
+	analyzeMetrics();
 	maxTimeDiff = getMaxTimeDiff();
 }
 
@@ -1026,15 +1042,7 @@ function handleKeyDownPlayback(event) {
 		break;
 		case 97:
 		case 65:
-		if (playbackScale === 0) {
-			playbackScale = - 0.125;
-		} if (playbackScale > 0 && playbackScale < 0.126) {
-			playbackScale = 0;
-		} else if (playbackScale < 0) {
-			playbackScale = playbackScale * 2;
-		} else {
-			playbackScale = playbackScale / 2;
-		}
+			slowerPlayback();
 		break;
 		case 115:
 		case 83:
@@ -1042,16 +1050,32 @@ function handleKeyDownPlayback(event) {
 		break;
 		case 100:
 		case 68:
-			if (playbackScale === 0 ) { 
-				playbackScale = 0.125; 
-			} else if(playbackScale < 0 && playbackScale > -0.125) {
-				playbackScale = 0;
-			} else if (playbackScale < 0) {
-				playbackScale = playbackScale / 2;
-			} else {
-				playbackScale = playbackScale * 2;
-			}
+			fasterPlayback();
 		break;
+	}
+}
+
+function slowerPlayback() {
+	if (playbackScale === 0) {
+		playbackScale = - 0.125;
+	} if (playbackScale > 0 && playbackScale < 0.126) {
+		playbackScale = 0;
+	} else if (playbackScale < 0) {
+		playbackScale = playbackScale * 2;
+	} else {
+		playbackScale = playbackScale / 2;
+	}
+}
+
+function fasterPlayback() {
+	if (playbackScale === 0 ) { 
+		playbackScale = 0.125; 
+	} else if(playbackScale < 0 && playbackScale > -0.125) {
+		playbackScale = 0;
+	} else if (playbackScale < 0) {
+		playbackScale = playbackScale / 2;
+	} else {
+		playbackScale = playbackScale * 2;
 	}
 }
 
@@ -1145,14 +1169,14 @@ function createMeters() {
 	for (let i = 0; i < nbrMeters; i++) {
 		let m = {};
 		m.distance = eventInformation.mTrackLength / (nbrMeters-1) * i;
-		m.position = [];
-		m.positions = [];
-		m.pace = 0;
-		m.lapTimes = [];
-		m.raceTimes = [];
-		m.speeds = [];
-		m.topSpeeds = [];
-		m.averageSpeeds = [];
+		m.position = []; // mean value of positions
+		m.positions = []; // participants positions over lap 1 - 4
+		m.pace = 0; // "average" time since lap start at this position
+		m.lapTimes = []; // [lap][participant]
+		m.raceTimes = []; // [lap][participant]
+		m.speeds = []; // [lap][participant]
+		m.topSpeeds = []; // [participant]
+		m.averageSpeeds = []; // [participant]
 		m.topSpeed = 0;
 		m.averageSpeed = 0;
 
@@ -1240,6 +1264,40 @@ function createMeters() {
 	}
 }
 
+function analyzeMetrics() {
+	let expectedPlaces = [];
+	let places = getPlaces(0);
+	let index = {};
+	for (let i = 1; i < data.length; i++) {
+		expectedPlaces = places;
+		places = getPlaces(i);
+		for (let n = 0; n < places.length-1; n++) {
+			if (places[n].d > nbrLaps * eventInformation.mTrackLength) {
+				continue;
+			}
+			if (places[n].j !== expectedPlaces[n].j) {
+				overtakes.push({
+					"time": data[i][0],
+					"overtaker": places[n].j,
+					"overtaken": places[n+1].j
+				});
+				break;
+			}
+		}
+	}
+}
+
+function getPlaces(i) {
+	let distances = [];
+	for (let j = 0; j < participants.length; j++) {	
+		distances.push({"j": j, "d": data[i][j+1][0], "speed": data[i][j+1][1]});
+	}
+	let sorted = distances.sort((a,b) => {
+		return b.d - a.d;
+	});
+	return sorted;
+}
+
 function addTimeDetails(meter, lap) {
 	let times = [];
 	for (j = 0; j < participants.length; j++) {
@@ -1267,7 +1325,7 @@ function addSpeedDetails(meter, lap) {
 		if (lap === 0) {
 			speed = meter.averageSpeeds[j];
 		} else {
-			 speed = meter.speeds[lap-1][j];
+			speed = meter.speeds[lap-1][j];
 		}
 		if (!Number.isNaN(speed) && document.getElementById(participants[j]).checked) {
 			speeds.push([speed, j]);
@@ -1378,6 +1436,9 @@ function formatSpeed(speed) {
 	return ((Math.round(speed * 3.6 * 10) / 10) + '.0').slice(0, 5) + ' km/h';
 }
 
+function participantEnabled(j) {
+	return document.getElementById(participants[j]).checked;
+}
 
 initiate();
 window.requestAnimFrame(loop);

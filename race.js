@@ -587,7 +587,8 @@ function explainProcedure(step) {
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			break;
 		case 2:
-			voice.speak('Consider going faster.', voice.Priority.EVENTUAL);
+			voice.speak('Press d-pad down to switch defensive weapon.', voice.Priority.EVENTUAL);
+			// voice.speak('Consider going faster.', voice.Priority.EVENTUAL);
 			//voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			//voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
@@ -596,7 +597,7 @@ function explainProcedure(step) {
 			//voice.speak('There can be multiple names on the same start time. They all start on the same beeps.', voice.Priority.EVENTUAL);
 			break;
 		case 4:
-			voice.speak('I am bored.', voice.Priority.EVENTUAL);
+			// voice.speak('I am bored.', voice.Priority.EVENTUAL);
 			//voice.speak('This is taking forever.', voice.Priority.EVENTUAL);
 			//voice.speak('Example.', voice.Priority.EVENTUAL);
 			//voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
