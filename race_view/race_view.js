@@ -30,8 +30,8 @@ let bounds = {
 }
 let rotation = 0;
 
-let collisions = [];
-/* collision = {
+let crashes = [];
+/* crash = {
 	"time": 0,
 	"gravity": 1,
 	"involved": 2
@@ -79,6 +79,7 @@ let headline = 'RaceView';
 const nbrMeters = 201;
 let info = {};
 let details = {};
+let pEnabled = [];
 
 
 let mapAlignment = {
@@ -108,7 +109,8 @@ function initiate() {
 	let p = document.getElementById('participants');
 	p.innerHTML = '';
 	for (let j = 0; j < participants.length; j++) {
-		p.innerHTML += '<div><input type="checkbox" id="' + participants[j] +'" name="' + participants[j] +'" checked><label style="cursor: pointer; font-weight: bold; color: ' + getColor(j) +  '" for="' + participants[j] +'">' + participants[j] + '</label></div>';
+		//p.innerHTML += '<div><input type="checkbox" id="' + participants[j] +'" name="' + participants[j] +'" checked><label style="cursor: pointer; font-weight: bold; color: ' + getColor(j) +  '" for="' + participants[j] +'">' + participants[j] + '</label></div>';
+		pEnabled.push(true);
 	}
 	setBounds();
 	createMeters();
@@ -116,6 +118,8 @@ function initiate() {
 	maxTimeDiff = getMaxTimeDiff();
 }
 
+let isFullscreen = false;
+let zoom = 1;
 function setBounds() {
 	let c = document.getElementById("canvas");
   let ctx = c.getContext("2d");
@@ -141,21 +145,66 @@ function setBounds() {
 			}
 		}
 	}
-	var canvas = document.getElementById("canvas");
+	setCanvasSize();
+}
 
-	if (bounds.height > bounds.width) {
-		rotation = Math.PI / 2;
-		offset.x = ctx.topMargin - bounds.x;
-		offset.y = - ctx.leftMargin - bounds.y;
-		canvas.width = bounds.height + ctx.leftMargin + ctx.rightMargin;
-		canvas.height = bounds.width + ctx.topMargin + ctx.bottomMargin;
-		rotation = Math.PI / 2;
+function setCanvasSize() {
+	let canvas = document.getElementById("canvas");
+	let ctx = canvas.getContext("2d");
+
+	if (isFullscreen) {
+		canvas.width = screen.width;
+		canvas.height = screen.height;
+		ctx.width = canvas.width;
+		ctx.height = canvas.height;
+		if (bounds.height > bounds.width) {			
+			if (bounds.height / bounds.width > screen.width / screen.height) {
+				// limited by screen width
+				zoom = (screen.width - ctx.leftMargin - ctx.rightMargin) / bounds.height;
+				console.log('screen width (r) => zoom: ' + zoom);
+				offset.x = ctx.topMargin - bounds.x;
+				offset.y = - (ctx.height - bounds.width * zoom) / 2 - bounds.x;
+			} else {
+				// limited by screen height
+				zoom = (screen.height - ctx.topMargin - ctx.bottomMargin) / bounds.width;
+				console.log('screen height (r) => zoom: ' + zoom);
+				offset.x = (ctx.width - bounds.height * zoom) / 2 - bounds.y;
+				offset.y = - ctx.leftMargin - bounds.y;
+			}
+			rotation = Math.PI / 2;
+		} else {
+			if (bounds.width / bounds.height > screen.width / screen.height) {
+				// limited by screen width
+				zoom = (screen.width - ctx.leftMargin - ctx.rightMargin) / bounds.width;
+				console.log('screen width => zoom: ' + zoom);
+				offset.x = ctx.leftMargin - bounds.x;
+				offset.y = (ctx.height - bounds.height * zoom) / 2 - bounds.y;
+			} else {
+				// limited by screen height
+				zoom = (screen.height - ctx.topMargin - ctx.bottomMargin) / bounds.height;
+				offset.x = (ctx.width - bounds.width * zoom) / 2 - bounds.x;
+				offset.y = - ctx.topMargin - bounds.y;
+				// console.log('bounds.x,y: ' + bounds.x + ', ' + bounds.y);
+				// console.log('bounds.width,height: ' + bounds.width + ', ' + bounds.height);
+				// console.log('screen height => zoom: ' + zoom + ', offset: [' + offset.x + ', ' + offset.y + ']');
+			}
+			rotation = 0;
+		}
 	} else {
-		offset.x = ctx.leftMargin - bounds.x;
-		offset.y = ctx.topMargin - bounds.y;
-		canvas.width = bounds.width + ctx.leftMargin + ctx.rightMargin;
-		canvas.height = bounds.height + ctx.topMargin + ctx.bottomMargin;
-		rotation = 0;
+		zoom = 1;
+		if (bounds.height > bounds.width) {
+			offset.x = ctx.topMargin - bounds.x;
+			offset.y = - ctx.leftMargin - bounds.y;
+			canvas.width = bounds.height + ctx.leftMargin + ctx.rightMargin;
+			canvas.height = bounds.width + ctx.topMargin + ctx.bottomMargin;
+			rotation = Math.PI / 2;
+		} else {
+			offset.x = ctx.leftMargin - bounds.x;
+			offset.y = ctx.topMargin - bounds.y;
+			canvas.width = bounds.width + ctx.leftMargin + ctx.rightMargin;
+			canvas.height = bounds.height + ctx.topMargin + ctx.bottomMargin;
+			rotation = 0;
+		}
 	}
 }
 
@@ -209,11 +258,30 @@ function loop() {
 			ctx.restore();
 		}
 		*/
+
+		//ctx.translate(bounds.x + bounds.width / 2,  bounds.y + bounds.height / 2);
+		
 		if (rotation !== 0) {
 			ctx.translate(bounds.height / 2,  + bounds.height / 2);
 			ctx.rotate(rotation);
 			ctx.translate(- bounds.height / 2,  - bounds.height / 2);
+			ctx.translate(bounds.y + bounds.height / 2,  bounds.x + bounds.width / 2);
+			ctx.scale(zoom, zoom);
+			ctx.translate(-bounds.y - bounds.height / 2, -bounds.x - bounds.width / 2);
+		} else {
+			ctx.translate(bounds.x + bounds.width / 2,  bounds.y + bounds.height / 2);
+			ctx.scale(zoom, zoom);
+			ctx.translate(-bounds.x - bounds.width / 2, -bounds.y - bounds.height / 2);
 		}
+		//ctx.translate(-bounds.x - bounds.width / 2, -bounds.y - bounds.height / 2);
+//		info['ctx.top'] = ctx.topMargin;
+//		info['zoom'] = zoom;
+//		info['b.y'] = bounds.y;
+//		info['b.height'] = bounds.height;
+//		info['offset.y'] = offset.y;
+		// offset.y = 560;
+//		info['calc.y'] = - ctx.topMargin - bounds.y;
+ 		
 		ctx.translate(offset.x, offset.y);
 		if (backgroundVisible && mode !== MODE.GRAPH) {
 			drawTrack(ctx);
@@ -223,11 +291,11 @@ function loop() {
 	  switch (mode) {
 	  	case MODE.PLAYBACK:
 			for (let j = 0; j < participants.length; j++) {
-				if (!document.getElementById(participants[j]).checked) continue;
+				if (!participantEnabled(j)) continue;
 				drawTrace(ctx, j, row[j][ROW.X], -row[j][ROW.Y]);
 			}
 			for (let j = 0; j < participants.length; j++) {
-				if (!document.getElementById(participants[j]).checked) continue;
+				if (!participantEnabled(j)) continue;
 				ctx.save();
 				ctx.fillStyle = getColor(j);
 				ctx.translate(row[j][ROW.X] ,  -row[j][ROW.Y]);
@@ -244,7 +312,7 @@ function loop() {
 	  	headline = eventInformation.mTranslatedTrackLocation + ' ' + eventInformation.mTranslatedTrackVariation;
 	  	info['Race Line'] = 'Work in progress';
 			for (let j = 0; j < participants.length; j++) {
-				if (!document.getElementById(participants[j]).checked) continue;
+				if (!participantEnabled(j)) continue;
 				drawLap(ctx, i0, j);
 			}
 	  	break;
@@ -352,6 +420,21 @@ function interpolateAngles(a, b, w) {
 	} else {
 		return b * w + a * (1 - w);		
 	}
+}
+
+let nDiffs = 0;
+function getAngleDiff(a, b) {
+	nDiffs++;
+	c = a - b;
+	//c = (c + Math.PI) % (Math.PI * 2) - Math.PI;
+	c += (c>Math.PI) ? -Math.PI * 2 : (c < -Math.PI) ? Math.PI * 2 : 0;
+
+	/*
+	if (nDiffs % 100 === 0) {
+		console.log(a + ' - ' + b + ' => ' + Math.round(c * 1000) / 1000);
+	}
+	*/
+	return c;
 }
 
 function seekForward(targetTime) {
@@ -490,7 +573,7 @@ function drawTimeOverRaceGraph(ctx) {
 		addTimeDetails(meters[selectedMeter], selectedLap-1);
 	}
 	for (let j = 0; j < participants.length; j++) {
-		if (!document.getElementById(participants[j]).checked) continue;
+		if (!participantEnabled(j)) continue;
 		ctx.beginPath();
 		ctx.strokeStyle = getColor(j, 100, 50, 0.3);
 		ctx.moveTo(leftMargin, y0 + (meters[0].raceTimes[0][j]- offset) * yScale);
@@ -523,7 +606,7 @@ function drawSpeedGraph(ctx, lap = 0) {
 	let yScale = 8;
 	let nbrVisible = 0;
 	for (let j = 0; j < participants.length; j++) {
-		if (!document.getElementById(participants[j]).checked) continue;
+		if (!participantEnabled(j)) continue;
 		nbrVisible++;
 	}
 	if (nbrVisible === 2) {
@@ -552,7 +635,7 @@ function drawSpeedGraph(ctx, lap = 0) {
 		addSpeedDetails(meters[selectedMeter], lap);
 	}
 	for (let j = 0; j < participants.length; j++) {
-		if (!document.getElementById(participants[j]).checked) continue;
+		if (!participantEnabled(j)) continue;
 		ctx.beginPath();
 		ctx.strokeStyle = getColor(j, 100, 50, alpha);
 		if (lap === 0) {
@@ -585,7 +668,7 @@ function getSpeedSpread(lap, i) {
 	let max = 0;
 	let meter = meters[i];
 	for (let j = 0; j < participants.length; j++) {
-		if (!document.getElementById(participants[j]).checked) continue;
+		if (!participantEnabled(j)) continue;
 		if (lap === 0) {
 			y = meter.averageSpeeds[j];
 		} else {
@@ -616,7 +699,7 @@ function drawSpeedGraphDiff(ctx, lap = 0) {
 	let j0 = -1;
 	let j1 = -1;
 	for (let j = 0; j < participants.length; j++) {
-		if (document.getElementById(participants[j]).checked) {
+		if (participantEnabled(j)) {
 			if (j0 < 0)
 			{
 				j0 = j;
@@ -695,7 +778,7 @@ function drawTopSpeedGraph(ctx) {
 		addTopSpeedDetails(meters[selectedMeter]);
 	}
 	for (let j = 0; j < participants.length; j++) {
-		if (!document.getElementById(participants[j]).checked) continue;
+		if (!participantEnabled(j)) continue;
 		ctx.beginPath();
 		ctx.strokeStyle = getColor(j, 100, 50, 0.3);
 		y = meters[0].topSpeeds[j];
@@ -721,7 +804,7 @@ function getTopSpeedSpread(i) {
 	let max = 0;
 	let meter = meters[i];
 	for (let j = 0; j < participants.length; j++) {
-		if (!document.getElementById(participants[j]).checked) continue;
+		if (!participantEnabled(j)) continue;
 		y = meter.topSpeeds[j];
 		if (!Number.isNaN(y)) {
 			y0 += y;
@@ -781,7 +864,7 @@ function drawLapTimesGraph(ctx) {
 
 	//let y0 = ctx.height - ctx.bottomMargin - (ctx.height - ctx.bottomMargin - ctx.topMargin) / 2;
 	for (let j = 0; j < participants.length; j++) {
-		if (!document.getElementById(participants[j]).checked) continue;
+		if (!participantEnabled(j)) continue;
 		ctx.beginPath();
 		ctx.moveTo(ctx.leftMargin, y0 + (meter.lapTimes[0][j] - avg) * yScale);
 		ctx.strokeStyle = getColor(j, 100, 50, 0.3);
@@ -809,7 +892,7 @@ function getLapTimesSpread(lap) {
 	let min = 10000000;
 	let max = 0;
 	for (let j = 0; j < participants.length; j++) {
-		if (!document.getElementById(participants[j]).checked) continue;
+		if (!participantEnabled(j)) continue;
 		y = meters[nbrMeters-1].lapTimes[lap-1][j];
 		if (!Number.isNaN(y)) {
 			y0 += y;
@@ -1268,9 +1351,38 @@ function analyzeMetrics() {
 	let expectedPlaces = [];
 	let places = getPlaces(0);
 	let index = {};
+	let pCrash = null;
 	for (let i = 1; i < data.length; i++) {
 		expectedPlaces = places;
 		places = getPlaces(i);
+		
+		let crash = null;
+		for (let n = 0; n < places.length-1; n++) {
+			if (Math.abs(places[n].rSpeed) > 1.1) {
+				if (pCrash !== null && data[i][0] - pCrash.time < 2000) {
+					crash = pCrash;
+				}
+				if (crash === null) {
+					crash = {
+						"time": data[i][0],
+						"gravity": 1,
+						"involved": [places[n].j]
+					};
+				} else {
+					if (crash.involved.includes(places[n].j)) {
+						crash.gravity += 0.5;
+					} else {
+						crash.gravity += 1;
+						crash.involved.push(places[n].j);
+					}
+				}
+				if (crash !== null) {
+					crashes.push(crash);
+					pCrash = crash;
+				}
+			}
+		}
+		
 		for (let n = 0; n < places.length-1; n++) {
 			if (places[n].d > nbrLaps * eventInformation.mTrackLength) {
 				continue;
@@ -1286,11 +1398,22 @@ function analyzeMetrics() {
 		}
 	}
 }
+/* crash = {
+	"time": 0,
+	"gravity": 1,
+	"involved": 2
+};*/
 
 function getPlaces(i) {
 	let distances = [];
 	for (let j = 0; j < participants.length; j++) {	
-		distances.push({"j": j, "d": data[i][j+1][0], "speed": data[i][j+1][1]});
+		let rSpeed = 0;
+		
+		if (i > 0) {
+			rSpeed = getAngleDiff(data[i][j+1][3][1], data[i-1][j+1][3][1]) / (data[i][0] - data[i-1][0]) * 1000;
+		}
+		
+		distances.push({"j": j, "d": data[i][j+1][0], "speed": data[i][j+1][1], "rSpeed": rSpeed});
 	}
 	let sorted = distances.sort((a,b) => {
 		return b.d - a.d;
@@ -1302,7 +1425,7 @@ function addTimeDetails(meter, lap) {
 	let times = [];
 	for (j = 0; j < participants.length; j++) {
 		let time = meter.raceTimes[lap][j];
-		if (!Number.isNaN(time) && document.getElementById(participants[j]).checked) {
+		if (!Number.isNaN(time) && participantEnabled(j)) {
 			times.push([time, j]);
 		}
 	}
@@ -1327,7 +1450,7 @@ function addSpeedDetails(meter, lap) {
 		} else {
 			speed = meter.speeds[lap-1][j];
 		}
-		if (!Number.isNaN(speed) && document.getElementById(participants[j]).checked) {
+		if (!Number.isNaN(speed) && participantEnabled(j)) {
 			speeds.push([speed, j]);
 		}
 	}
@@ -1345,7 +1468,7 @@ function addTopSpeedDetails(meter) {
 	let speeds = [];
 	for (j = 0; j < participants.length; j++) {
 		let speed = meter.topSpeeds[j];
-		if (!Number.isNaN(speed) && document.getElementById(participants[j]).checked) {
+		if (!Number.isNaN(speed) && participantEnabled(j)) {
 			speeds.push([speed, j]);
 		}
 	}
@@ -1364,7 +1487,7 @@ function addLapTimesDetails(lap) {
 	let meter = meters[nbrMeters-1];
 	for (j = 0; j < participants.length; j++) {
 		let time = meter.lapTimes[lap][j];
-		if (!Number.isNaN(time) && document.getElementById(participants[j]).checked) {
+		if (!Number.isNaN(time) && participantEnabled(j)) {
 			times.push([time, j]);
 		}
 	}
@@ -1437,7 +1560,12 @@ function formatSpeed(speed) {
 }
 
 function participantEnabled(j) {
-	return document.getElementById(participants[j]).checked;
+	//return document.getElementById(participants[j]).checked;
+	return pEnabled[j];
+}
+
+function toggleParticipantEnabled(j) {
+	pEnabled[j] = !pEnabled[j];
 }
 
 initiate();

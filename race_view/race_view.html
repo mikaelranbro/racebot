@@ -3,6 +3,28 @@
 
    <head>
       <title id="title">RaceView</title>
+      <link href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAdhwAAHYcBj+XxZQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAATVSURBVHic7ZhtiFRlFMd/586MbzvaztzcRN01qAy2UMSI8kslCVpBZShq67qzqyUVQlBfImKhIMQvEhRstTMqBZUFqeRWm4HZi2WkH9JMs1YLV2xnNlu11d25pw9373h32pkdZ8ZdoecHA/d5nvOc+z+HO+d5AYPBYDAYDAaDwWAwGAwGg8FgMBgMBoPBYDD8D9BmrK44T6kio61lNBBtIZQKcVFgWzBA06RVJMvh+K+3ifT1UkWAMIAFvQGHfwB6wnRWL3WfRxv5LcG4SZoR87vlUBdZzReFOtBmrO5q5gGLVLgdqAUmA6Fhpp4Gjg/8OkQ5YAXYW9nAsSLiKBo5tYWKUD9nfX1phBejFbwkS0nnmpjcxC3qsFKgDphWRk2nFb61hK9U2WE3cqiMvv+D6CuMTU5ko6VMUKj3BhR2S5o6ew1/eH09cSZfgOUW1CvMHcb3SYGfFbqA88AFUcY7QkSgErCBGxnuS1GOqLBF0mz2aykXmcLX/SYzHIuOrPGkCo+Jg4hQr7Aoj+A0sE2ErUGL9kJqibYQSo1lJkotyq3APcCdQHAI834V3hXhZbuBgwVFVwD+BMxxLH4o0k97WniyKsbRUgX92cpEEeZbwgJVHgamZpmkVWkJjuP5ykfpLvV9mQR0xZkvsOuyHQivRo6zTppxShWTjTYTTNZwvwhrUBYCAd9wh6MsmdzE96W8I5OAZCuPILx/mfO7FTZYUv7gh6BalRVAxNd3XoSF0Rh7inV6KQFxVgNvlCBwtDgL7BU4p3AepVMsjin8Sj8/Dlc4M8VGIKpXXOsVIQzcm9EuoF4jAMk4HaLsUYsd0R62yzou+Cdb3oPCTSOjd8S5XoWVKO+lwhxNJbjPPygA3a3MdoQDBTrsBzoRgihVDC5Mo81Z4BdcTTOASUPYpIFldqNb7ywAx2J8Ac47BFb0Bam0G6mxY0xlDFGFh4BPyqO/SJQjqiyOniBiNzLHbmRWNEwUZZ7CW4D/3x0AWpNxqmHgC0gmuAPlm1z+BbbRx6ro45zJZZNKsEyVzcCY8kRVIMKnfQEWT6nnXC6TZIIFKB8AE33dLXYja61ckzwU9p8Lszwr+OuAm/HtCqMx3hHh6SJCKIXjIYsVWcFPYPBSiR2jHaEpa27dqS1UDJcAR6DOd3StAdqAU8BhoBOIecbRGK8B+4oIpChEeMK35Z4GfAj8DaSAg7hbawDsGFtRPvZNrxhzkbvzJkCU7b7T2ASgHVjoM7GBOL5DlEBrkfFcLociDbQNPIeB3cCDXCrKtcBnwF2ZGRbxQR6EeXkToBY7fc21wMwcphu8F4vDdwXJL502kUxxexa4YQgbC9joNdTi66zx2vxfgMNPvuasPKZVwBSAQIgT+XyWDR2k7bY8lrMZKMx2PSdxl3EAHGHGcF+Af3k8nce0D9yTmfYxIhtKkUGrTb5TYQ+uPo9MzALX5i+CygO+VhzozWG5CffSAydATV6f5cNfixKQM/GZsVSC6fgSAIwPAkiAk04/671eGVhGxC16HoeBJqAFt+h4tAPPeI20m6T1FMDAzVCht9HX+MU7sN83tgt4AWhm8M70c+C5TEuZjvA6whlVzljQVcxVeA2wGDdJ+4CPyJ39kWYusAR3xfoS2MrVo81gMBgMBoPBcFXxL4AjXRSmkA52AAAAAElFTkSuQmCC" rel="icon" type="image/x-icon"/>
+      <style>
+         /* Chrome, Safari and Opera syntax */
+         :-webkit-full-screen {
+            background-color: white;
+         }
+
+         /* Firefox syntax */
+         :-moz-full-screen {
+            background-color: white;
+         }
+
+         /* IE/Edge syntax */
+         :-ms-fullscreen {
+            background-color: white;
+         }
+
+         /* Standard syntax */
+         :fullscreen {
+           background-color: white;
+         }
+      </style>
    </head>
    <body topmargin="0">
       <canvas id="canvas" width="1800" height="800"></canvas>
@@ -15,6 +37,8 @@
       <!--<script type="text/javascript" src="data.js"></script>-->
       <!--<script type="text/javascript" src="20190409_Donington_Park_GP.js"></script>-->
       <script type="text/javascript" src="../race_data/20190521_Dubai_Autodrome_GP.js"></script>
+      <!--<script type="text/javascript" src="../race_data/20190604_Spa_Francorchamps_GP.js"></script>-->
+      
       
       <script type="text/JavaScript" src="gui.js"></script>
       <script type="text/JavaScript" src="race_view.js"></script>
@@ -22,3 +46,4 @@
 
 
 </html>
+

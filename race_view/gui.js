@@ -13,35 +13,65 @@ let controlHighlightColor = 'rgba(252, 250, 240, 1)';
 
 function register() {
 	let c = document.getElementById("canvas");
+	document.addEventListener("fullscreenchange", handleFullscreenChange);	/* Standard syntax */
+	document.addEventListener("mozfullscreenchange", handleFullscreenChange); /* Firefox */
+	document.addEventListener("webkitfullscreenchange", handleFullscreenChange);/* Chrome, Safari and Opera */
+	document.addEventListener("msfullscreenchange", handleFullscreenChange);/* IE / Edge */
+	document.addEventListener("fullscreenerror", handleFullscreenError);/* Standard syntax */
+	document.addEventListener("mozfullscreenerror", handleFullscreenError);/* Firefox */
+	document.addEventListener("webkitfullscreenerror", handleFullscreenError);/* Chrome, Safari and Opera */
+	document.addEventListener("msfullscreenerror", handleFullscreenError);/* IE / Edge */
 	c.addEventListener('mousemove', handleMouseMove);
 	c.addEventListener('mousedown', handleMouseDown);
 	c.addEventListener('mouseup', handleMouseUp);
 	c.addEventListener('mouseout', handleMouseOut);
+	c.addEventListener('touchstart', handleTouchStart);
+	c.addEventListener('touchmove', handleTouchMove);
+	c.addEventListener('touchend', handleTouchEnd);
+	c.addEventListener('touchcancel', handleTouchCancel);
+}
+
+function handleFullscreenChange(event) {
+	if (document.fullscreenElement) {
+    // fullscreen is activated
+    isFullscreen = true;
+  } else {
+  	// fullscreen is cancelled
+  	isFullscreen = false;
+  }
+ 	setCanvasSize();
+}
+
+function handleFullscreenError(event) {
+	if (document.fullscreenElement) {
+    isFullscreen = true;
+  } else {
+  	isFullscreen = false;
+  }
+}
+
+function getMouseCoordinates(event) {
+	mouse.x = event.offsetX;
+	mouse.y = event.offsetY;
+	if (isFullscreen) {
+		mouse.x = event.screenX;
+		mouse.y = event.screenY;
+	}
 }
 
 function handleMouseMove(event) {
-	mouse.x = event.offsetX;
-	mouse.y = event.offsetY;
+	getMouseCoordinates(event);
 }
 
 function handleMouseDown(event) {
 	mouse.button = event.button;
-	mouse.x = event.offsetX;
-	mouse.y = event.offsetY;
+	getMouseCoordinates(event);
 	mouse.processed = false;
-	/*
-	if (hooverLap !== -1) {
-		selectedLap = hooverLap;
-	}
-	if (hooverMeter !== -1) {
-		selectedMeter = hooverMeter;
-	}*/
 }
 
 function handleMouseUp(event) {
 	mouse.button = NaN;
-	mouse.x = event.offsetX;
-	mouse.y = event.offsetY;
+	getMouseCoordinates(event);
 	mouse.processed = false;
 }
 
@@ -51,6 +81,32 @@ function handleMouseOut(event) {
 	hooverLap = -1;
 	hooverMeter = -1;
 }
+
+function handleTouchStart(event) {
+	if (event.touches.length === 1) {
+		mouse.x = event.touches[0].clientX;
+		mouse.y = event.touches[0].clientY;
+		mouse.processed = false;
+		mouse.button = 0;
+	}
+}
+function handleTouchMove(event) {
+	if (event.touches.length === 1) {
+		mouse.x = event.touches[0].clientX;
+		mouse.y = event.touches[0].clientY;
+		//mouse.processed = false;
+		mouse.button = 0;
+	}
+}
+function handleTouchEnd(event) {
+	mouse.button = NaN;
+	mouse.processed = false;
+}
+function handleTouchCancel(event) {
+	mouse.button = NaN;
+	mouse.processed = false;
+}
+
 register();
 
 let menuHeight = 48;
@@ -105,6 +161,8 @@ function drawButtons(ctx) {
 	ctx.stroke();
 	ctx.restore();
 	drawSubButtons(ctx);
+	drawParticipantButtons(ctx);
+	drawFullscreenButton(ctx, ctx.width - ctx.rightMargin / 3);
 }
 
 function drawSubButtons(ctx) {
@@ -113,7 +171,7 @@ function drawSubButtons(ctx) {
 			drawGraphButtons(ctx);
 		break;
 		case MODE.PLAYBACK:
-		drawPlaybackButtons(ctx);
+			drawPlaybackButtons(ctx);
 		break;
 	}
 }
@@ -271,6 +329,13 @@ function drawFasterButton(ctx, x0) {
 	ctx.restore();
 }
 
+function drawFullscreenButton(ctx, x0) {
+	ctx.save();
+	let y0 = setupButton(ctx, x0, toggleFullscreen);
+	ctx.fillRect(x0, y0 + buttonHeight / 4, buttonHeight / 2 * 1.6 , buttonHeight / 2);
+	ctx.strokeRect(x0, y0 + buttonHeight / 4, buttonHeight / 2 * 1.6 , buttonHeight / 2);
+	ctx.restore();
+}
 
 function drawTimeLine(ctx, x0) {
 	let width = ctx.width - ctx.rightMargin / 2 - x0;
@@ -316,7 +381,7 @@ function drawTimeLine(ctx, x0) {
 	let iw = 8;
 	let h = 3;
 
-	if (mouse.y > y0 - buttonHeight / 4 && y0 < y0 + buttonHeight / 4 * 3 && mouse.x >= x0 && mouse.y <= x0 + width) {
+	if (mouse.y > y0 - buttonHeight / 4 && y0 < y0 + buttonHeight / 4 * 3 && mouse.x >= x0 && mouse.x <= x0 + width) {
 		if (mouse.button === 0) {
 			raceTime = (mouse.x - x0) / width * maxTime;
 		}
@@ -357,7 +422,7 @@ function drawTimeLine(ctx, x0) {
 	ctx.fill();
 	ctx.shadowOffsetY = 0;
 	ctx.shadowBlur = 0;
-	for (i = 0; i < overtakes.length; i++) {
+	for (let i = 0; i < overtakes.length; i++) {
 		//getColor(j, s = 100, l = 40, a = 1)
 		if (!participantEnabled(overtakes[i].overtaker) || !participantEnabled(overtakes[i].overtaken)) {
 			continue;
@@ -367,9 +432,9 @@ function drawTimeLine(ctx, x0) {
 		if (Math.abs(xo - x) < ow) {
 			yo = yo - (ow - Math.abs(xo - x)) / ow * h;
 		}
-		ctx.fillStyle = getColor(overtakes[i].overtaker, 100, 50, 1);
+		ctx.fillStyle = getColor(overtakes[i].overtaker, 100, 40, 1);
 		ctx.fillRect(xo - 1, yo - 4, 3, 3);
-		ctx.fillStyle = getColor(overtakes[i].overtaken, 100, 50, 1);
+		ctx.fillStyle = getColor(overtakes[i].overtaken, 100, 40, 1);
 		ctx.fillRect(xo - 1, yo + 1, 3, 3);
 	}
 	if (mouse.y > y0 - buttonHeight / 4 && y0 < y0 + buttonHeight / 4 * 3 && mouse.x >= x0 && mouse.x <= x0 + width &&
@@ -378,7 +443,35 @@ function drawTimeLine(ctx, x0) {
 		ctx.fillRect(mouse.x - 4, y0, 8, buttonHeight / 2);
 	}
 	ctx.stroke();
-	//ctx.fillRect(x0, y0, width, buttonHeight / 2);
+	for (let i = 0; i < crashes.length; i++) {
+		let xo = crashes[i].time / maxTime * width + x0;
+		let yo = y0 + buttonHeight / 2 - 2;
+		if (Math.abs(xo - x) < ow) {
+			yo = yo - (ow - Math.abs(xo - x)) / ow * h;
+		}
+		s = Math.min(4, 1.5 + 0.1 * crashes[i].gravity);
+		ctx.beginPath();
+
+		ctx.moveTo(xo, yo);
+		ctx.lineTo(xo - 4 * s, yo);
+		ctx.lineTo(xo - 2 * s, yo - 1 * s);
+		ctx.lineTo(xo - 2.7 * s, yo - 2.7 * s);
+		ctx.lineTo(xo - 1 * s, yo - 2 * s);
+		ctx.lineTo(xo, yo - 4 * s);
+		ctx.lineTo(xo + 1 * s, yo - 2 *s);
+		ctx.lineTo(xo + 2.7 * s, yo - 2.7 * s);
+		ctx.lineTo(xo + 2 * s, yo - 1 * s);
+		ctx.lineTo(xo + 4 * s, yo);
+		ctx.closePath();
+		ctx.fillStyle = getColor(crashes[i].involved[0], 60, 25, 0.4);
+		ctx.fill();
+		/*
+		if (crashes[i].involved.length > 1) {
+			ctx.strokeStyle = getColor(crashes[i].involved[1], 60, 25, 0.4);
+			ctx.stroke();
+		}
+		*/
+	}
 
 	ctx.beginPath();
 	ctx.moveTo(x, y0 + buttonHeight / 4);
@@ -393,6 +486,117 @@ function drawTimeLine(ctx, x0) {
 	ctx.fillStyle = controlLightColor;
 	ctx.fill();
 	ctx.stroke();
+	ctx.restore();
+}
+
+function drawParticipantButtons(ctx) {
+	ctx.save();
+	let row = getInterpolatedData(raceTime);
+	let y0 = ctx.height - ctx.bottomMargin - participants.length * 24;
+	let x0 = ctx.width - 160;
+	for (let j = 0; j < participants.length; j++) {
+		ctx.save();
+		
+		ctx.textAlign = 'right';
+		ctx.textBaseline = 'middle';
+		ctx.font = 'bold 12px "Arial"';
+		if (inBounds({"x": x0, "y": y0 + j * 24 - 8, "width": 160, "height": 16}, mouse)){
+			ctx.translate(-4, 0);
+			if (mouse.button === 0 && !mouse.processed) {
+				mouse.processed = true;
+				toggleParticipantEnabled(j);
+			}
+		}
+		ctx.translate(ctx.width - 32, y0 +  j * 24);
+		if (inBounds({"x": x0 - 200, "y": y0 - 64, "width": 360, "height": ctx.height - y0 + 64}, mouse)){
+			ctx.fillStyle = getColor(j);
+		} else {
+			ctx.fillStyle = getColor(j, 100, 40, 0.4);
+		}
+		
+		if (participantEnabled(j)) {
+			ctx.fillText(participants[j], -16, 0);
+			let speed = row[j][ROW.SPEED];
+			let acc = 0;
+			if (mode === MODE.PLAYBACK) {
+				if (i1 > i0) {
+					let tickTime = data[i1][0] - data[i0][0];
+					if (tickTime > 0) {
+						acc = (data[i1][j+1][1] - data[i0][j+1][1]) / tickTime;
+					}
+				}
+				ctx.translate(speed / 8, 0);
+			}
+			drawSideCar(ctx, getColor(j), acc);
+		} else {
+			ctx.fillStyle = 'grey';
+			if (inBounds({"x": x0 - 200, "y": y0 - 64, "width": 360, "height": ctx.height - y0 + 64}, mouse)){
+				ctx.fillText(participants[j], -16, 0);
+			}
+			drawSideCar(ctx, 'grey');
+		}
+		ctx.restore();
+	}
+	ctx.restore();
+}
+
+/*
+ctx.font = '20px "Courier New"';
+	ctx.textAlign = 'left';
+	ctx.textBaseline = 'top';
+	for (i = 0; i < nbrGraphModes; i++) {
+		if (i === graphMode) {
+			ctx.font = 'bold 20px "Courier New"';	
+		} else {
+			ctx.font = '20px "Courier New"';
+		}
+		let x0 = Math.min(ctx.width - ctx.rightMargin, this.innerWidth - 32 - ctx.rightMargin);
+		if (inBounds({"x": x0, "y": i * 24 + menuHeight + 32, "width": ctx.rightMargin, "height": 24}, mouse)){
+			if (mouse.button === 0) {
+				graphMode = i;
+			} 
+			if (graphMode !== i) {
+				x0 -= 4;
+			}
+		}
+		ctx.fillText(graphModeString[i], x0, i * 24 + menuHeight + 32);
+	}
+*/
+
+function drawSideCar(ctx, color = 'grey', acc = 0) {
+	ctx.save();
+	ctx.save();
+	ctx.rotate(Math.PI * Math.min(Math.max(-2 * acc, -0.02), 0.02));
+	ctx.beginPath();
+	ctx.moveTo(6.5, 3);
+	ctx.bezierCurveTo(5, -2.5, 13.5, -2.5, 12, 3);
+	ctx.lineTo(14, 2.9);
+	ctx.bezierCurveTo(14.2, -1.5, 12.2, -2.8, 7.5, -3);
+	ctx.lineTo(-7, -3);
+	ctx.bezierCurveTo(-5.8, -4.2, 0.8, -5, 5.5, -3);
+	ctx.lineTo(7.5, -3);
+	ctx.bezierCurveTo(3.3, -6.5, -4.3, -6.9, -9.7, -4.2);
+	ctx.lineTo(-13, -6.7); // spoler top
+	ctx.lineTo(-13, -4.5);
+	ctx.lineTo(-12, -4.5);
+	ctx.lineTo(-12.3, -1.9);
+	ctx.lineTo(-12.8, -1.5);
+	ctx.lineTo(-12.7, 2.8);
+	ctx.lineTo(-10, 3);
+	ctx.bezierCurveTo(-11.3, -2.5, -3.8, -2.5, -4.7, 3);
+	ctx.closePath();
+	ctx.fillStyle = color;
+	ctx.fill();
+	ctx.strokeStyle = 'black';
+// ctx.stroke();
+	ctx.restore();
+	ctx.beginPath();
+	ctx.moveTo(-7.4, 1.8);
+	ctx.arc(-7.4, 1.8, 1.7, 0, Math.PI * 2);
+	ctx.moveTo(9.2, 1.8);
+	ctx.arc(9.2, 1.8, 1.7, 0, Math.PI * 2);
+	ctx.fillStyle = 'black';
+	ctx.fill();
 	ctx.restore();
 }
 
@@ -442,4 +646,34 @@ function inBounds(bounds, point) {
 		return true;
 	}
 	return false;
+}
+
+
+function toggleFullscreen() {
+	let canvas = document.getElementById("canvas");
+	if (!isFullscreen) {
+  	if (canvas.requestFullscreen) {
+    	canvas.requestFullscreen();
+  	} else if (canvas.mozRequestFullScreen) { /* Firefox */
+    	canvas.mozRequestFullScreen();
+  	} else if (canvas.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+    	canvas.webkitRequestFullscreen();
+  	} else if (canvas.msRequestFullscreen) { /* IE/Edge */
+    	canvas.msRequestFullscreen();
+  	}
+  	isFullscreen = true;
+	} else {
+  	if (document.exitFullscreen) {
+    	document.exitFullscreen();
+  	} else if (document.mozCancelFullScreen) { /* Firefox */
+    	document.mozCancelFullScreen();
+  	} else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+    	document.webkitExitFullscreen();
+  	} else if (document.msExitFullscreen) { /* IE/Edge */
+  	  document.msExitFullscreen();
+	  }
+	  isFullscreen = false;
+	}
+	mouse.processed = true;
+	mouse.button = NaN;
 }

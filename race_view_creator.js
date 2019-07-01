@@ -35,5 +35,14 @@ function insertScript(path, outStream) {
 }
 
 module.exports.test = function() {
-	this.createRaceView('race_data/20190416_Watkins_Glen_GP.js', 'html/20190416_Watkins_Glen_GP.html');
+	this.createRaceView('race_data/20190416_Watkins_Glen_GP.js', 'html/20190416_Watkins_Glen_GP_test.html');
 };
+
+module.exports.createAll = function() {
+	this.createRaceView('race_data/20190409_Donington_Park_GP.js', 'html/20190409_Donington_Park_GP.html');
+	this.createRaceView('race_data/20190416_Watkins_Glen_GP.js', 'html/20190416_Watkins_Glen_GP.html');
+	this.createRaceView('race_data/20190423_Algarve_.js', 'html/20190423_Algarve_.html');
+	this.createRaceView('race_data/20190507_Brands_Hatch_GP.js', 'html/20190507_Brands_Hatch_GP.html');
+	this.createRaceView('race_data/20190514_Red_Bull_Ring_GP.js', 'html/20190514_Red_Bull_Ring_GP.html');
+	this.createRaceView('race_data/20190521_Dubai_Autodrome_GP.js', 'html/20190521_Dubai_Autodrome_GP.html');
+}
