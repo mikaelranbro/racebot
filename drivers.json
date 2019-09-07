@@ -2,7 +2,7 @@
 	"kevinneriksson": {
 		"name": "kevinneriksson",
 		"steamName": "The Real Deal",
-		"points": 71,
+		"points": 0,
 		"position": 1,
 		"car": null,
 		"sounds": "Kevin",
@@ -14,7 +14,7 @@
 	"borbo": {
 		"name": "borbo",
 		"steamName": "Borbo",
-		"points": 66,
+		"points": 0,
 		"position": 2,
 		"car": null,
 		"sounds": "Boarboo",
@@ -26,7 +26,7 @@
 	"Mikael": {
 		"name": "Mikael",
 		"steamName": "Mikael",
-		"points": 63,
+		"points": 0,
 		"position": 3,
 		"car": null,
 		"sounds": "Mee-kell",
@@ -38,7 +38,7 @@
 	"veloxieer": {
 		"name": "veloxieer",
 		"steamName": "veloxieer",
-		"points": 61,
+		"points": 0,
 		"position": 4,
 		"car": null,
 		"sounds": "veloxieer",
@@ -50,7 +50,7 @@
 	"Sadjev": {
 		"name": "Sadjev",
 		"steamName": "Sadjev",
-		"points": 58,
+		"points": 0,
 		"position": 5,
 		"car": null,
 		"sounds": "Zadj-eve",
@@ -62,7 +62,7 @@
 	"Rymdkatten": {
 		"name": "Rymdkatten",
 		"steamName": "Rymdkatten",
-		"points": 57,
+		"points": 0,
 		"position": 6,
 		"car": null,
 		"sounds": "Riymdkattene",
@@ -71,22 +71,20 @@
 		"startPosition": 4,
 		"hue": 210
 	},
-	"Håkan": {
-		"name": "Håkan",
-		"steamName": "Håkan",
-		"points": 35,
+	"Mattias": {
+		"name": "Mattias",
+		"steamName": "Mattias",
+		"points": 0,
 		"position": 7,
 		"car": null,
-		"sounds": "Hawk-anne",
-		"seen": "20190604T213815",
-		"greeted": "20190604T192721",
+		"sounds": "Matte-eeas",
 		"startPosition": 2,
 		"hue": 70
 	},
 	"staffan": {
 		"name": "staffan",
 		"steamName": "staffan",
-		"points": 21,
+		"points": 0,
 		"position": 8,
 		"car": null,
 		"sounds": "Stuff-anne",
@@ -95,15 +93,13 @@
 		"startPosition": 1,
 		"hue": 300
 	},
-	"Robert": {
-		"name": "Robert",
-		"steamName": "robert_lindh",
-		"points": 12,
+	"JRehn": {
+		"name": "JRehn",
+		"steamName": "JRehn",
+		"points": 0,
 		"position": 9,
 		"car": null,
-		"sounds": "Row-bert",
-		"seen": "20190402T213000",
-		"greeted": "20190402T213000",
+		"sounds": "John",
 		"startPosition": 1,
 		"hue": 340
 	}

@@ -206,6 +206,8 @@ module.exports.register = function register(user, steamName, sounds) {
 
 module.exports.updateStandings = function updateStandings(results, eventInformation) {
 	let commit = true;
+	let multiplier = 1;
+	let minNbrLaps = 15;
 	if (settings.practiceMode === true) {
 		console.log('Discarding standings because of practice mode.');
 		commit = false;
@@ -222,7 +224,16 @@ module.exports.updateStandings = function updateStandings(results, eventInformat
 		console.log('Discarding standings because the scheduled start time (' + scheduled.date + ') is more than 3 hours off (' + duration.humanize(true) + ').');
 		commit = false;
 	}
-	if (eventInformation.mLapsInEvent < 15) {
+	if (scheduled.hasOwnProperty('type')) {
+			if (scheduled.type === 'sprint') {
+				minNbrLaps = 6;
+				multiplier = 1;
+			} else {
+				minNbrLaps = 15;
+				multiplier = 2;
+			}
+	}
+	if (eventInformation.mLapsInEvent < minNbrLaps) {
 		console.log('Discarding standings because of insufficient number of laps for an official event (' + eventInformation.mLapsInEvent + ').');
 		commit = false;
 	}
@@ -237,13 +248,13 @@ module.exports.updateStandings = function updateStandings(results, eventInformat
 				let points = 0;
 				if (result.position === 1) {
 					points = nbrDrivers + 1;
-					console.log('Participant ' + name + ' won the race and gains ' + points + ' points.');
+					console.log('Participant ' + name + ' won the race and gains ' + points * multiplier + ' points.');
 				} else {
 					points = nbrDrivers + 1 - result.position;
-					console.log('Participant ' + name + ' finished on position ' + result.position + ' and gains ' + points + ' points.');
+					console.log('Participant ' + name + ' finished on position ' + result.position + ' and gains ' + points * multiplier + ' points.');
 				}
 				if (commit) {
-					driver.points += points;
+					driver.points += points * multiplier;
 				}
 			} else {
 				console.log('Participant ' + name + ' did not finish.');

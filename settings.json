@@ -3,7 +3,7 @@
 	"runTest": false,
 	"practiceMode": false,
 	"startProcedure": true,
-	"secondsPerPoint": 2,
+	"secondsPerPoint": 0.5,
 	"minStartDiff": 3,
 	"startSilenceBuffer": 5,
 	"startTriggerTime": 4,

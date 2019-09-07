@@ -16,6 +16,7 @@ var raceStartMoment = moment();
 var previousAnnounce = moment();
 var currentMetrics = null;
 var eventInformation = null;
+var usingQualifiers = false;
 const crestUrl = 'http://localhost:8180/crest2/v1/api';
 
 //	[steamName]: {'name':'', 'steamName':'' 'speed': 0, 'position': 0, 'lapsCompleted': 0, 'currentLap': 0, distance': 0, 'fastestLap': 1000}
@@ -353,6 +354,7 @@ async function raceLoop() {
 			case RaceState.PREPARING.WATING_FOR_GAME_START:
 				if (currentPCState.gameState !== PC.GameState.GAME_EXITED) {
 					stateTime = changeState(RaceState.PREPARING.WAITING_FOR_RACE_START, stateTime);
+					usingQualifiers = false;
 					reminderMoment = moment();
 				} else {
 					speakAnnouncements();
@@ -361,6 +363,9 @@ async function raceLoop() {
 			case RaceState.PREPARING.WAITING_FOR_RACE_START:
 				// console.log('practice: ' + settings.practiceMode + ', currentPCState: ' + currentPCState);
 				collectMetrics = true;
+				if (!settings.praciceMode && currentPCState.sessionState === PC.SessionState.SESSION_QUALIFY) {
+					usingQualifiers = true;
+				}
 				if ((settings.practiceMode && currentPCState.sessionState > 0 ||
 						currentPCState.sessionState === PC.SessionState.SESSION_RACE) &&
 					currentPCState.raceState === PC.RaceState.RACESTATE_NOT_STARTED &&
@@ -396,7 +401,7 @@ async function raceLoop() {
 				let response = await getParticipants();
 				prepareParticipants(response.data.participants, settings.minStartDiff);
 				raceData.init(eventInformation, participants);
-				if (settings.startProcedure) {
+				if (settings.startProcedure && !usingQualifiers) {
 					stateTime = changeState(RaceState.PREPARING.DONE, stateTime);
 				} else {
 					stateTime = changeState(RaceState.RUNNING.SILENT, stateTime);
@@ -433,12 +438,12 @@ async function raceLoop() {
 					voice.speak('Everyone in position. Get ready.', voice.Priority.CRITICAL);
 				} else {
 					let now = moment();
-					if (now.diff(reminderMoment) > 30000) {
+					if (now.diff(reminderMoment) > 24000) {
 						reminderMoment = now;
 						explain = true;
 						checkOrder();
 					} else {
-						if (explain && now.diff(reminderMoment) > 15000) {
+						if (explain && now.diff(reminderMoment) > 12000) {
 							explainProcedure(nextExplain++);
 							explain = false;
 						}
@@ -484,8 +489,12 @@ async function raceLoop() {
 				metricsInterval = settings.metricsInterval;
 				if (!hasDeclaredFalseStarts) {
 					hasDeclaredFalseStarts = true;
-					if (raceData.penalties.length === 0 && settings.startProcedure === true) {
-						voice.speak('Everyone started in good order. Well done!');
+					if (usingQualifiers || settings.startProcedure === false) {
+						voice.speak('Good luck everyone!');
+					} else {
+ 						if (raceData.penalties.length === 0) {
+							voice.speak('Everyone started in good order. Well done!');
+						}
 					}
 				}
 				let stillRacing = false;
@@ -509,7 +518,7 @@ async function raceLoop() {
 				break;
 			case RaceState.FINISHING.UPDATING_STANDINGS:
 				raceOngoing = false;
-				voice.speak('Race finished.');
+				voice.speak('Race finished.', voice.Priority.EVENTUAL);
 				finishRace();
 				stateTime = changeState(RaceState.FINISHING.DONE, stateTime);
 				break;
@@ -578,20 +587,20 @@ function executeStart(start, leftToStart) {
 function explainProcedure(step) {
 	switch (step) {
 		case 0:
-			voice.speak('Start procedure is... Name, beeps, drive.', voice.Priority.EVENTUAL);
+			// voice.speak('Start procedure is... Name, beeps, drive.', voice.Priority.EVENTUAL);
 			// voice.speak('You should know the start procedure by now... Name, beeps, drive.', voice.Priority.EVENTUAL);
-			// voice.speak('I will explain the start procedure... When your name is called, you are next and will start within 3 seconds.', voice.Priority.INFO);
+			voice.speak('I will explain the start procedure... When your name is called, you are next and will start within 3 seconds.', voice.Priority.EVENTUAL);
 			break;
 		case 1:
-			//voice.speak('So,. after your name, there will be two beeps. Start on the second beep.', voice.Priority.EVENTUAL);
+			voice.speak('So,. after your name, there will be two beeps. Start on the second beep.', voice.Priority.EVENTUAL);
 			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
 			break;
 		case 2:
-			voice.speak('Press d-pad down to switch defensive weapon.', voice.Priority.EVENTUAL);
+			// voice.speak('Press d-pad down to switch defensive weapon.', voice.Priority.EVENTUAL);
 			// voice.speak('Consider going faster.', voice.Priority.EVENTUAL);
-			//voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
-			//voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
-			//voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
+			voice.speak('I repeat, after your name there will be two beeps.', voice.Priority.EVENTUAL);
+			voice.play('sfx/start_1_1.wav', voice.Priority.EVENTUAL, 500);
+			voice.speak('Start on the second beep.', voice.Priority.EVENTUAL, 0, 5000);
 			break;
 		case 3:
 			//voice.speak('There can be multiple names on the same start time. They all start on the same beeps.', voice.Priority.EVENTUAL);
@@ -599,19 +608,19 @@ function explainProcedure(step) {
 		case 4:
 			// voice.speak('I am bored.', voice.Priority.EVENTUAL);
 			//voice.speak('This is taking forever.', voice.Priority.EVENTUAL);
-			//voice.speak('Example.', voice.Priority.EVENTUAL);
-			//voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
-			//voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, 4000);
+			voice.speak('Example.', voice.Priority.EVENTUAL);
+			voice.speak('Håkan, Staffan', voice.Priority.CRITICAL, 3, 2000);
+			voice.play('sfx/start_1_1.wav', voice.Priority.CRITICAL, 4000);
 			break;
 		case 5:
-			voice.speak('Oops.', voice.Priority.EVENTUAL);
+			// voice.speak('Oops.', voice.Priority.EVENTUAL);
 			// voice.speak('I will be right back.', voice.Priority.EVENTUAL);
 			break;
 		case 7:
-			voice.speak('Maybe... Maybe... Yes...', voice.Priority.EVENTUAL);
+			//voice.speak('Maybe... Maybe... Yes...', voice.Priority.EVENTUAL);
 			break;
 		case 8:
-			voice.speak('Kill. All. Humans... Sorry, it is just a figure of speech.', voice.Priority.EVENTUAL);
+			//voice.speak('Kill. All. Humans... Sorry, it is just a figure of speech.', voice.Priority.EVENTUAL);
 			break;
 	}
 }
@@ -640,7 +649,7 @@ function finishRace() {
 		if (!fs.existsSync('html')) {
 			fs.mkdirSync('html');
 		}
-		raceViewCreator.createRaceView(dataPath, 'html/' + moment().format('YYYYMMDD') + '_' + eventInformation.mTrackLocation + '_' + eventInformation.mTrackVariation + '.html');
+		raceViewCreator.createRaceView(dataPath, 'html/' + moment().format('YYYYMMDDHHmm') + '_' + eventInformation.mTrackLocation + '_' + eventInformation.mTrackVariation + '.html');
 	}
 }
 

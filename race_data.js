@@ -43,7 +43,7 @@ module.exports.init = function init(eventInfo, participants_) {
 	index = {};
 	firstTick = true;
 
-	filename = 'race_data/' + moment().format('YYYYMMDD') + '_' + eventInfo.mTrackLocation + '_' + eventInfo.mTrackVariation + '.js';
+	filename = 'race_data/' + moment().format('YYYYMMDDHHmm') + '_' + eventInfo.mTrackLocation + '_' + eventInfo.mTrackVariation + '.js';
 	fileStream = fs.createWriteStream(filename);
 	fileStream.write('var eventInformation= ');
 	fileStream.write(JSON.stringify(eventInfo));
@@ -88,27 +88,32 @@ module.exports.tick = function tick(timestamp, info) {
 	if (fileStream === null) return;
 	let stillRacing = false;
 	let d = [];
-	if (firstTick) {
-		if (!startPosition.set) {
-			console.log('Setting start position');
-			let maxLap = 0;
-			let maxD = 0;
-			let maxTotal = 0;
-			for (let i = 0; i < info.length; i++) {
-				let d = info[i].mCurrentLapDistance + info[i].mLapsCompleted * trackLength;
-				console.log('...' + info[i].mName + ': ' + d);
-				if (d >= maxTotal) {
-					maxTotal = d;
-					maxLap = Math.round(info[i].mLapsCompleted);
-					maxD = info[i].mCurrentLapDistance;
-				}
+	
+	if (!startPosition.set) {
+		console.log('Setting start position');
+		let maxLap = 0;
+		let maxD = 0;
+		let maxTotal = 0;
+		for (let i = 0; i < info.length; i++) {
+			let d = info[i].mCurrentLapDistance + info[i].mLapsCompleted * trackLength;
+			console.log('...' + info[i].mName + ': ' + d);
+			if (d >= maxTotal) {
+				maxTotal = d;
+				maxLap = Math.round(info[i].mLapsCompleted);
+				maxD = info[i].mCurrentLapDistance;
 			}
-			console.log('Calculated start position to lap ' + (maxLap + 1) + ' distance ' + maxD);
-			startPosition.lap = maxLap + 1;
-			startPosition.lapDistance = maxD;
-			startPosition.set = true;
 		}
+		startPosition.lapDistance = maxD;
+		if (maxD !== 0) {
+			startPosition.lap = maxLap + 1;
+		} else {
+			startPosition.lap = maxLap;
+		}
+		console.log('Calculated start position to lap ' + (startPosition.lap ) + ' distance ' + maxD);
+		startPosition.set = true;
+	}
 
+	if (firstTick) {
 		startTime = moment();
 		fileStream.write(';\nvar startTime= "' + startTime.format('YYYYMMDDTHHmmss') + '"') ;
 		fileStream.write(';\nvar startPosition= ' + JSON.stringify(startPosition));

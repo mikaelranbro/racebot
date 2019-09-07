@@ -103,7 +103,19 @@ window.onload = function () {
 }
 
 function initiate() {
-	nbrLaps = eventInformation.mLapsInEvent - startPosition.lap;
+	if (eventInformation.mLapsInEvent > 0) {
+		if (startPosition.lapDistance > 0) {
+			nbrLaps = eventInformation.mLapsInEvent - startPosition.lap;
+		} else {
+			nbrLaps = eventInformation.mLapsInEvent;
+		}
+	} else {
+		let maxLaps = 0;
+		for (let j = 0; j < participants.length; j++) {
+			maxLaps = Math.max(results[participants[j]].lapsCompleted, maxLaps);
+		}
+		nbrLaps = maxLaps;
+	}
 	let title = document.getElementById('title');
 	title.innerHTML = eventInformation.mTranslatedTrackLocation + ' ' + eventInformation.mTranslatedTrackVariation;
 	let p = document.getElementById('participants');
@@ -594,7 +606,7 @@ function drawTimeOverRaceGraph(ctx) {
 }
 
 function drawSpeedGraph(ctx, lap = 0) {
-	if (lap > eventInformation.mLapsInEvent - startPosition.lap) return;
+	if (lap > nbrLaps) return;
 	ctx.save();
 	ctx.setTransform(1, 0, 0, 1, 0, 0);
 	ctx.lineJoin = 'round';
@@ -685,7 +697,7 @@ function getSpeedSpread(lap, i) {
 }
 
 function drawSpeedGraphDiff(ctx, lap = 0) {
-	if (lap > eventInformation.mLapsInEvent - startPosition.lap) return;
+	if (lap > nbrLaps) return;
 	ctx.save();
 	let rightMargin = 64;
 	let step = (ctx.width - ctx.leftMargin - rightMargin) / nbrMeters;
@@ -1208,7 +1220,7 @@ function handleKeyDownGraph(event) {
 		// s
 		break;
 		case 97:
-		selectedLap = (selectedLap - 1 + eventInformation.mLapsInEvent - startPosition.lap + 1) % (eventInformation.mLapsInEvent - startPosition.lap + 1);
+		selectedLap = (selectedLap + nbrLaps) % (nbrLaps + 1);
 		// a
 		break;
 		case 100:
