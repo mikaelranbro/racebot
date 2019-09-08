@@ -208,6 +208,7 @@ module.exports.updateStandings = function updateStandings(results, eventInformat
 	let commit = true;
 	let multiplier = 1;
 	let minNbrLaps = 15;
+	let bonusPoints = [1];
 	if (settings.practiceMode === true) {
 		console.log('Discarding standings because of practice mode.');
 		commit = false;
@@ -228,9 +229,11 @@ module.exports.updateStandings = function updateStandings(results, eventInformat
 			if (scheduled.type === 'sprint') {
 				minNbrLaps = 6;
 				multiplier = 1;
+				bonusPoints = [1];
 			} else {
 				minNbrLaps = 15;
 				multiplier = 2;
+				bonusPoints = [4, 2, 1];
 			}
 	}
 	if (eventInformation.mLapsInEvent < minNbrLaps) {

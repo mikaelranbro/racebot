@@ -1257,7 +1257,7 @@ function createMeters() {
 	let dOffset = 0;
 	for (let j = 0; j < participants.length; j++) {
 		if (Math.abs(data[0][j+1][0]) < 0.01) {
-			dOffset = eventInformation.mTrackLength - startPosition.lapDistance;
+			dOffset = (eventInformation.mTrackLength - startPosition.lapDistance) % eventInformation.mTrackLength;
 		}
 	}
 
@@ -1554,6 +1554,10 @@ function getRowAtDistance(dist, j, range) {
 			row.push(interpolate(data[range.from][0], data[range.to][0], w));
 			row.push(interpolate(data[range.from][j+1][1], data[range.to][j+1][1], w));
 			row.push(interpolate(data[range.from][j+1][2], data[range.to][j+1][2], w));
+		} else {
+			row.push(data[range.from][0]);
+			row.push(data[range.from][j+1][1]);
+			row.push(data[range.from][j+1][2]);
 		}
 	}
 	return row;
