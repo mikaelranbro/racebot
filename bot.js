@@ -22,7 +22,7 @@ const helpString = '\
 \n !register <steam name> <pronounciation> - register for the championship and tell the bot how to pronounce your name\
 \n !schedule - display racing schedule\
 \n !prepare - display start order of the next race\
-\n !start <delay> - start/restart race in <delay> seconds\
+\n !start start/restart race\
 \n !abort - abort ongoing race\
 \n !finish -  finish ongoing race and update standings with results\
 \n !mute - silence the bot\
@@ -252,11 +252,7 @@ client.on('message', message => {
 				break;
 			case 'begin':
 			case 'start':
-				if (args.length > 0) {
-					race.start(parseInt(args[0], 10));
-				} else {
-					race.start();
-				}
+				race.start();
 				break;
 			case 'abort':
 			case 'cancel':

@@ -199,7 +199,7 @@ module.exports.prepare = prepare;
 
 
 module.exports.start = async function start() {
-	await this.abort();
+	await stop();
 	running = true;
 
 	if (settings.crestEnabled) {
@@ -213,30 +213,51 @@ module.exports.start = async function start() {
   if (settings.practiceMode) {
   	voice.speak('Race start initiated in practice mode.');
   } else {
-  	voice.speak('Race start initiated.')	
+  	season.parseSchedule();
+  	if (season.nextRace !== null) {
+  		if (season.nextRace.type === 'sprint') {
+  			voice.speak('Sprint race initiated.', voice.Priority.EVENTUAL);
+  		} else {
+  			voice.speak('Handicap-race initiated.', voice.Priority.EVENTUAL);
+  		}
+  	}
   }
-
 };
 
-module.exports.abort = async function abort() {
+async function stop() {
+	console.log('stopping...');
+	let somethingToStop = running;
 	running = false;
 	if (settings.crestEnabled && crestPromise !== null) {
+		console.log('waiting for crestPromise...');
 		await crestPromise;
 		crestPromise = null;
+		somethingToStop = true;
 	}
 	if (racePromise !== null) {
+		console.log('waiting for racePromise...');
 		await racePromise;
 		raceData.close();
+		racePromise = null;
+		somethingToStop = true;
+	}
+	return somethingToStop;
+}
+
+module.exports.abort = async function abort() {
+	if (await stop()) {
 		console.log('>------------------ Race aborted ------------------<');
 		voice.speak('Race aborted.');
-		racePromise = null;
 	}
 };
 
 module.exports.finish = async function finish() {
-	this.abort();
-  finishRace();
-  season.updateStandings(raceData.getResults(), eventInformation);
+	if (await stop()) {
+		console.log('>------------------ Race finished ------------------<');
+		voice.speak('Race finished.');
+  	finishRace();
+  	season.updateStandings(raceData.getResults(), eventInformation);
+	}
 };
 
 function speakAnnouncements() {
@@ -438,12 +459,12 @@ async function raceLoop() {
 					voice.speak('Everyone in position. Get ready.', voice.Priority.CRITICAL);
 				} else {
 					let now = moment();
-					if (now.diff(reminderMoment) > 24000) {
+					if (now.diff(reminderMoment) > 26000) {
 						reminderMoment = now;
 						explain = true;
 						checkOrder();
 					} else {
-						if (explain && now.diff(reminderMoment) > 12000) {
+						if (explain && now.diff(reminderMoment) > 13000) {
 							explainProcedure(nextExplain++);
 							explain = false;
 						}

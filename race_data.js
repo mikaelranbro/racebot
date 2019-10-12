@@ -120,8 +120,8 @@ module.exports.tick = function tick(timestamp, info) {
 		fileStream.write(';\nvar data= [');
 	}
 	for (let i = 0; i < info.length; i++) {
+		let name = info[i].mName;
 		if ((firstTick || snapshot[info[i].mName].raceState === 2) && info[i].mRacePosition !== 0) {
-			let name = info[i].mName;
 			if (!firstTick) {
 				prevSnap[name] = snapshot[name];
 			}
@@ -147,7 +147,10 @@ module.exports.tick = function tick(timestamp, info) {
 			}
 			stillRacing = true;
 		} else {
-			// console.log('Player ' + info[i].mName + ' not racing. RaceState: ' + info[i].mRaceStates);
+			let s = snapshot[name];
+			// Make sure that the position updates even after reaching finishing line.
+			
+			s.position = info[i].mRacePosition;
 		}
 	}
 

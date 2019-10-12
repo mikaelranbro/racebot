@@ -41,6 +41,7 @@ function sortDriversOnPoints() {
 	let i = 1;
 	sorted.forEach(driver => {
 		driver.position = i;
+		delete driver.startPosition;
 		i++;
 		drivers[driver.name] = driver;
 	});
@@ -54,14 +55,17 @@ function parseSchedule() {
 		race.id = key;
 		if ((race.state === 'upcoming' || race.state === 'ongoing') && race.moment.isBefore(nextMoment)) {
 			nextRace = race;
+			module.exports.nextRace = nextRace;
 			nextMoment = race.moment;
 		}
 	});
 	console.log(JSON.stringify(nextRace));
 }
+module.exports.parseSchedule = parseSchedule;
 parseSchedule();
 module.exports.schedule = schedule;
 module.exports.nextRace = nextRace;
+
 
 
 // Code blocks: surround by ``` or `
@@ -236,10 +240,6 @@ module.exports.updateStandings = function updateStandings(results, eventInformat
 				bonusPoints = [4, 2, 1];
 			}
 	}
-	if (eventInformation.mLapsInEvent < minNbrLaps) {
-		console.log('Discarding standings because of insufficient number of laps for an official event (' + eventInformation.mLapsInEvent + ').');
-		commit = false;
-	}
 
 	let nbrDrivers = Object.keys(drivers).length;
 	Object.keys(results).forEach(name => {
@@ -249,15 +249,18 @@ module.exports.updateStandings = function updateStandings(results, eventInformat
 			let result = results[name];
 			if (result.raceState === 3) {
 				let points = 0;
+				points = nbrDrivers + 1 - result.position;
+				if (result.position <= bonusPoints.length) {
+					points += bonusPoints[result.position-1];
+				}
+				points = points * multiplier;
 				if (result.position === 1) {
-					points = nbrDrivers + 1;
-					console.log('Participant ' + name + ' won the race and gains ' + points * multiplier + ' points.');
+					console.log('Participant ' + name + ' won the race and gains ' + points + ' points.');
 				} else {
-					points = nbrDrivers + 1 - result.position;
-					console.log('Participant ' + name + ' finished on position ' + result.position + ' and gains ' + points * multiplier + ' points.');
+					console.log('Participant ' + name + ' finished on position ' + result.position + ' and gains ' + points + ' points.');
 				}
 				if (commit) {
-					driver.points += points * multiplier;
+					driver.points += points;
 				}
 			} else {
 				console.log('Participant ' + name + ' did not finish.');
@@ -273,6 +276,7 @@ module.exports.updateStandings = function updateStandings(results, eventInformat
 		fs.writeFile('schedule.json', JSON.stringify(schedule, null, '\t'), 'utf8', (err) => {
 			if (err) throw err;
 			console.log('Saved "schedule.json"');
+			parseSchedule();
 		});
 	}
 };
@@ -284,7 +288,3 @@ module.exports.save = function save() {
 		console.log('Saved "drivers.json"');
 	});
 }
-
-
-
-//console.log(module.exports.getSchedule());

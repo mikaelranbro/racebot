@@ -2,105 +2,119 @@
 	"kevinneriksson": {
 		"name": "kevinneriksson",
 		"steamName": "The Real Deal",
-		"points": 0,
+		"points": 145,
 		"position": 1,
 		"car": null,
 		"sounds": "Kevin",
-		"seen": "20190604T213815",
-		"greeted": "20190604T201314",
-		"startPosition": 8,
-		"hue": 270
-	},
-	"borbo": {
-		"name": "borbo",
-		"steamName": "Borbo",
-		"points": 0,
-		"position": 2,
-		"car": null,
-		"sounds": "Boarboo",
-		"seen": "20190613T233443",
-		"greeted": "20190613T185508",
-		"startPosition": 7,
-		"hue": 0
+		"seen": "20191008T222341",
+		"greeted": "20191008T195956",
+		"hue": 270,
+		"startPosition": 10
 	},
 	"Mikael": {
 		"name": "Mikael",
 		"steamName": "Mikael",
-		"points": 0,
-		"position": 3,
+		"points": 102,
+		"position": 2,
 		"car": null,
 		"sounds": "Mee-kell",
-		"seen": "20190614T215352",
-		"greeted": "20190614T215352",
-		"startPosition": 6,
-		"hue": 40
+		"seen": "20191010T051659",
+		"greeted": "20191009T201318",
+		"hue": 40,
+		"startPosition": 9
 	},
 	"veloxieer": {
 		"name": "veloxieer",
 		"steamName": "veloxieer",
-		"points": 0,
-		"position": 4,
+		"points": 93,
+		"position": 3,
 		"car": null,
 		"sounds": "veloxieer",
-		"seen": "20190604T213815",
-		"greeted": "20190604T200556",
-		"startPosition": 3,
-		"hue": 170
+		"seen": "20191008T222629",
+		"greeted": "20191008T194615",
+		"hue": 170,
+		"startPosition": 8
+	},
+	"borbo": {
+		"name": "borbo",
+		"steamName": "Borbo",
+		"points": 90,
+		"position": 4,
+		"car": null,
+		"sounds": "Boarboo",
+		"seen": "20191009T215852",
+		"greeted": "20191009T194322",
+		"hue": 0,
+		"startPosition": 7
 	},
 	"Sadjev": {
 		"name": "Sadjev",
 		"steamName": "Sadjev",
-		"points": 0,
+		"points": 67,
 		"position": 5,
 		"car": null,
 		"sounds": "Zadj-eve",
-		"seen": "20190613T210512",
-		"greeted": "20190613T191040",
-		"startPosition": 5,
-		"hue": 120
+		"seen": "20191012T095356",
+		"greeted": "20191012T095356",
+		"hue": 120,
+		"startPosition": 6
 	},
 	"Rymdkatten": {
 		"name": "Rymdkatten",
 		"steamName": "Rymdkatten",
-		"points": 0,
+		"points": 58,
 		"position": 6,
 		"car": null,
 		"sounds": "Riymdkattene",
-		"seen": "20190604T213815",
-		"greeted": "20190604T193510",
-		"startPosition": 4,
-		"hue": 210
+		"seen": "20191008T223551",
+		"greeted": "20191008T195857",
+		"hue": 210,
+		"startPosition": 5
 	},
-	"Mattias": {
-		"name": "Mattias",
-		"steamName": "Mattias",
-		"points": 0,
+	"mattemus1973": {
+		"name": "mattemus1973",
+		"steamName": "Hotler",
+		"points": 44,
 		"position": 7,
 		"car": null,
-		"sounds": "Matte-eeas",
-		"startPosition": 2,
-		"hue": 70
+		"sounds": "matti-as",
+		"seen": "20191001T221736",
+		"greeted": "20191001T193804",
+		"hue": 70,
+		"startPosition": 4
 	},
 	"staffan": {
 		"name": "staffan",
 		"steamName": "staffan",
-		"points": 0,
+		"points": 39,
 		"position": 8,
 		"car": null,
 		"sounds": "Stuff-anne",
-		"seen": "20190604T213523",
-		"greeted": "20190604T201150",
-		"startPosition": 1,
-		"hue": 300
+		"seen": "20191008T220713",
+		"greeted": "20191008T200359",
+		"hue": 300,
+		"startPosition": 3
 	},
 	"JRehn": {
 		"name": "JRehn",
 		"steamName": "JRehn",
-		"points": 0,
+		"points": 30,
 		"position": 9,
 		"car": null,
 		"sounds": "John",
-		"startPosition": 1,
-		"hue": 340
+		"hue": 340,
+		"seen": "20191008T220721",
+		"startPosition": 2
+	},
+	"prezes0x50": {
+		"name": "prezes0x50",
+		"steamName": "prezes0x50",
+		"points": 2,
+		"position": 10,
+		"car": null,
+		"sounds": "Dariuz",
+		"hue": 0,
+		"seen": "20191008T210439",
+		"startPosition": 1
 	}
 }

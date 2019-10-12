@@ -17,9 +17,10 @@ module.exports.runOffline = function runOffline(bot) {
 };
 module.exports.runTests = function runTests(bot) {
 	console.log('TEST!');
-	console.log(bot.season.getNextEvent());
-	console.log(bot.season.getDriver('Mikael'));
-	console.log(bot.season.getDriver('Nisse'));
+	// console.log(bot.season.getNextEvent());
+	//console.log(bot.season.getDriver('Mikael'));
+	// console.log(bot.season.getDriver('Nisse'));
+	testStartAbort(bot);
 
 	// bot.season.updateStandings(testResults, testEventInformation);
 };
@@ -71,8 +72,14 @@ async function testStartFinish(bot) {
 	console.log('***** Starting *****');
 	bot.race.start();
 	await sleep(35000);
-	console.log('***** Aborting *****');
-	bot.race.abort();
+	console.log('***** Finishing *****');
+	bot.race.finish();
+}
+
+async function testStart(bot) {
+	console.log('***** Starting *****');
+	bot.race.start();
+	console.log('***** Done ******');
 }
 
 function sleep(ms) {

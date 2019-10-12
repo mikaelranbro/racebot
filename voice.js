@@ -44,9 +44,12 @@ const names = {
 	"Rymdkatten": "Riymdkattene",
 	"Per": "Paire",
 	"Håkan": "Hawk-anne",
-	"Staffan": "Stuff-anne",
+	"staffan": "Stuff-anne",
 	"roblind": "Row-bert",
-	"Nurburgring": "Neur-burg-ring"
+	"Nurburgring": "Neur-burg-ring",
+	"mattemus1973": "matti-as",
+	"prezes0x50": "Prezes",
+	"JRehn": "John"
 };
 module.exports.names = names;
 

@@ -5,17 +5,19 @@
 		"type": "sprint",
 		"duration": 20,
 		"laps": 0,
-		"state": "upcoming",
-		"id": "1"
+		"state": "finished",
+		"id": "1",
+		"moment": "2019-09-10T18:15:00.000Z"
 	},
 	"2": {
 		"date": "20190910T2100",
 		"track": "Sportsland SUGO",
-		"type": "handicapped",
+		"type": "handicap",
 		"duration": 0,
-		"laps": 30,
-		"state": "upcoming",
-		"id": "2"
+		"laps": 32,
+		"state": "finished",
+		"id": "2",
+		"moment": "2019-09-10T19:00:00.000Z"
 	},
 	"3": {
 		"date": "20190917T2015",
@@ -23,17 +25,19 @@
 		"type": "sprint",
 		"duration": 20,
 		"laps": 0,
-		"state": "upcoming",
-		"id": "3"
+		"state": "finished",
+		"id": "3",
+		"moment": "2019-09-17T18:15:00.000Z"
 	},
 	"4": {
 		"date": "20190917T2100",
 		"track": "Long Beach",
-		"type": "handicapped",
+		"type": "handicap",
 		"duration": 0,
-		"laps": 25,
-		"state": "upcoming",
-		"id": "4"
+		"laps": 32,
+		"state": "finished",
+		"id": "4",
+		"moment": "2019-09-17T19:00:00.000Z"
 	},
 	"5": {
 		"date": "20191001T2015",
@@ -41,17 +45,19 @@
 		"type": "sprint",
 		"duration": 20,
 		"laps": 0,
-		"state": "upcoming",
-		"id": "5"
+		"state": "finished",
+		"id": "5",
+		"moment": "2019-10-01T18:15:00.000Z"
 	},
 	"6": {
 		"date": "20191001T2100",
 		"track": "Imola",
-		"type": "handicapped",
+		"type": "handicap",
 		"duration": 0,
-		"laps": 30,
-		"state": "upcoming",
-		"id": "6"
+		"laps": 25,
+		"state": "finished",
+		"id": "6",
+		"moment": "2019-10-01T19:00:00.000Z"
 	},
 	"7": {
 		"date": "20191008T2015",
@@ -59,17 +65,19 @@
 		"type": "sprint",
 		"duration": 20,
 		"laps": 0,
-		"state": "upcoming",
-		"id": "7"
+		"state": "finished",
+		"id": "7",
+		"moment": "2019-10-08T18:15:00.000Z"
 	},
 	"8": {
 		"date": "20191008T2100",
 		"track": "Silverstone",
-		"type": "handicapped",
+		"type": "handicap",
 		"duration": 0,
 		"laps": 30,
-		"state": "upcoming",
-		"id": "8"
+		"state": "finished",
+		"id": "8",
+		"moment": "2019-10-08T19:00:00.000Z"
 	},
 	"9": {
 		"date": "20191022T2015",
@@ -78,16 +86,18 @@
 		"duration": 20,
 		"laps": 0,
 		"state": "upcoming",
-		"id": "9"
+		"id": "9",
+		"moment": "2019-10-22T18:15:00.000Z"
 	},
 	"10": {
 		"date": "20191022T2100",
 		"track": "Zolder",
-		"type": "handicapped",
+		"type": "handicap",
 		"duration": 0,
 		"laps": 30,
 		"state": "upcoming",
-		"id": "10"
+		"id": "10",
+		"moment": "2019-10-22T19:00:00.000Z"
 	},
 	"11": {
 		"date": "20191029T2015",
@@ -96,16 +106,18 @@
 		"duration": 20,
 		"laps": 0,
 		"state": "upcoming",
-		"id": "11"
+		"id": "11",
+		"moment": "2019-10-29T19:15:00.000Z"
 	},
 	"12": {
 		"date": "20191029T2100",
 		"track": "SPA",
-		"type": "handicapped",
+		"type": "handicap",
 		"duration": 0,
 		"laps": 30,
 		"state": "upcoming",
-		"id": "12"
+		"id": "12",
+		"moment": "2019-10-29T20:00:00.000Z"
 	},
 	"13": {
 		"date": "20191112T2015",
@@ -114,16 +126,18 @@
 		"duration": 20,
 		"laps": 0,
 		"state": "upcoming",
-		"id": "13"
+		"id": "13",
+		"moment": "2019-11-12T19:15:00.000Z"
 	},
 	"14": {
 		"date": "20191112T2100",
 		"track": "Laguna Seca",
-		"type": "handicapped",
+		"type": "handicap",
 		"duration": 0,
 		"laps": 30,
 		"state": "upcoming",
-		"id": "14"
+		"id": "14",
+		"moment": "2019-11-12T20:00:00.000Z"
 	},
 	"15": {
 		"date": "20191119T2015",
@@ -132,15 +146,17 @@
 		"duration": 20,
 		"laps": 0,
 		"state": "upcoming",
-		"id": "15"
+		"id": "15",
+		"moment": "2019-11-19T19:15:00.000Z"
 	},
 	"16": {
 		"date": "20191119T2100",
 		"track": "Watkins Glen",
-		"type": "handicapped",
+		"type": "handicap",
 		"duration": 0,
 		"laps": 30,
 		"state": "upcoming",
-		"id": "16"
+		"id": "16",
+		"moment": "2019-11-19T20:00:00.000Z"
 	}
 }
