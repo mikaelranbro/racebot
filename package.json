@@ -5,7 +5,7 @@
 	"main": "bot.js",
 	"author": "Mikael Ranbro",
 	"dependencies": {
-		"axios": "^0.18.1",
+		"axios": "^0.21.1",
 		"discord.io": "^2.5.3",
 		"discord.js": "^11.5.1",
 		"ffmpeg-binaries": "^4.0.0",
