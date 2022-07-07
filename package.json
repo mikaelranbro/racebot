@@ -10,7 +10,7 @@
 		"discord.js": "^11.5.1",
 		"ffmpeg-binaries": "^4.0.0",
 		"got": "^9.6.0",
-		"moment": "^2.24.0",
+		"moment": "^2.29.4",
 		"node-opus": "^0.3.2",
 		"node-wav-player": "^0.1.0",
 		"opusscript": "0.0.6",
